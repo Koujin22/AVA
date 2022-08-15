@@ -5,16 +5,16 @@
 #include <iomanip>
 #include <sstream>
 
+
 enum LOG_LEVELS {
 	NONE = 0,
-	ERROR = 1,
+	ERR = 1,
 	WARN = 2,
 	INFO = 3,
 	DEBUG = 4,
 	VERBOSE = 5, 
 
 };
-
 
 class LoggerFactory {
 
@@ -39,16 +39,21 @@ public:
 
 		}
 		if (newLevel >= 3) {
-			std::cout << "|   INFO|               Logger | Setting log level to " << string_new_level << std::endl;
+			std::cout << "|   INFO|                 Logger | Setting log level to " << string_new_level << std::endl;
 		}
 	}
 
 protected:
-	
+	enum class COLORS {
+		RED,
+		DEFAULT,
+		YELLOW
+	};
+
 	class Logger {
 	public:
-		Logger(std::string name, std::string level, bool will_print) : will_print{ will_print } {
-			s << "|" << std::setw(7) << level << "| " << std::setw(20) << name << " | ";
+		Logger(std::string name, std::string level, bool will_print, std::string color) : will_print{will_print} {
+			s << "|" << color << std::setw(7) << level << "\x1B[0m" << "| " << std::setw(22) << name << " | ";
 		};
 
 		template <class T>
@@ -69,19 +74,33 @@ protected:
 
 	};
 
-	Logger LogError() { return Log("ERROR", level >= 1); }
-	Logger LogWarn() { return Log("WARN", level >= 2); }
+	Logger LogError() { return Log("ERROR", level >= 1, COLORS::RED);  }
+	Logger LogWarn() { return Log("WARN", level >= 2, COLORS::YELLOW); }
 	Logger LogInfo() { return Log("INFO", level >= 3); }
 	Logger LogDebug() { return Log("DEBUG", level >= 4); }
 	Logger LogVerbose() { return Log("VERBOSE", level >= 5); }
 
-	Logger Log(std::string level, bool will_print) {
-		return Logger(class_name, level, will_print);
+	Logger Log(std::string level, bool will_print, COLORS color = COLORS::DEFAULT) {
+		return Logger(class_name, level, will_print, GetColorSequence(color));
 	}
 
-	inline static volatile LOG_LEVELS level = LOG_LEVELS::ERROR;
+	inline static volatile LOG_LEVELS level = LOG_LEVELS::ERR;
 
 private:
+
+	
+	static std::string GetColorSequence(COLORS fg_color) {
+		switch (fg_color) {
+		case COLORS::RED:
+			return "\x1B[31m";
+		case COLORS::YELLOW:
+			return "\x1B[33m";
+		case COLORS::DEFAULT:
+			return "\x1B[0m";
+		default:
+			return "";
+		}
+	}
 
 	static std::string getFormatedClassName(std::string unformated) {
 		return unformated.substr(unformated.find(" ")+1, unformated.length() - 1);

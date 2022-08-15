@@ -1,7 +1,6 @@
 #pragma once
-#include "IFrameworkService.hpp"
 
-class IWakeUpService : public IFrameworkService {
+class IWakeUpService {
 public:
 	virtual ~IWakeUpService() {};
 	virtual void WaitForWakeUp() = 0;

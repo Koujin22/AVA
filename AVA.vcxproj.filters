@@ -42,10 +42,16 @@
     <ClCompile Include="ConfigurationManager.cpp">
       <Filter>Archivos de origen\Util</Filter>
     </ClCompile>
-    <ClCompile Include="IFrameworkService.hpp">
-      <Filter>Archivos de encabezado\Framework\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="GoogleTextToSpeechService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="PicoRecorderService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="PicoSpeechToIntentService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="PicoIntent.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,6 +75,24 @@
       <Filter>Archivos de encabezado\Framework\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GoogleTextToSpeechService.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="IMicrophoneService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="PicoRecorderService.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ISpeechToIntentService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="PicoSpeechToIntentService.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="IIntent.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="PicoIntent.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
   </ItemGroup>

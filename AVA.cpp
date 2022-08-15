@@ -1,14 +1,22 @@
-// AVA.cpp : Este archivo contiene la función "main". La ejecución del programa comienza y termina ahí.
-//
 
 #include <iostream>
 #include "FrameworkManager.hpp"
 #include "ConfigurationManager.hpp"
 #include "Logging.hpp"
-
+#include "PicoIntent.hpp"
+#include <memory>
 
 
 using namespace std;
+
+
+namespace ConstStr {
+    const string welcome = 
+        R"(<speak>
+            Ava 1.0 <break time="200ms"/>
+            <emphasis level="strong">ready for action!</emphasis>
+        </speak>)";
+}
 
 int main()
 {
@@ -18,27 +26,38 @@ int main()
     cout << "||                                                      ||" << endl;
     cout << "##########################################################" << endl;
 
-    LoggerFactory::SetLoggingLevel(DEBUG);
+    LoggerFactory::SetLoggingLevel(VERBOSE);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();
 
-    framework_manager->Setup();
+    framework_manager->SaySsml(ConstStr::welcome);
 
-    framework_manager->ListenForWakeUpWord();
+    bool turn_off = false;
+    bool understood = false;
+    while (!turn_off) {
 
-    framework_manager->Say("TESTEO 123");
+        framework_manager->ListenForWakeUpWord();
+
+        framework_manager->SayText("What can I do for you sir?");
+        understood = false;
+        while (!understood) {
+            std::unique_ptr<IIntent> intent(framework_manager->GetIntent());
+
+            if (!intent) {
+                framework_manager->SayText("Sorry, I couldn't get that. Could you repeat again, sir?");
+            }
+            else if (intent->GetModule() == "AVA" && intent->GetAction() == "turnoff") {
+                understood = true;
+                turn_off = true;
+            } else {
+                understood = true;
+            }
+            intent.reset();
+        }
+    }
 
     delete framework_manager;
 
+    return 0;
 }
-
-// Ejecutar programa: Ctrl + F5 o menú Depurar > Iniciar sin depurar
-// Depurar programa: F5 o menú Depurar > Iniciar depuración
-
-// Sugerencias para primeros pasos: 1. Use la ventana del Explorador de soluciones para agregar y administrar archivos
-//   2. Use la ventana de Team Explorer para conectar con el control de código fuente
-//   3. Use la ventana de salida para ver la salida de compilación y otros mensajes
-//   4. Use la ventana Lista de errores para ver los errores
-//   5. Vaya a Proyecto > Agregar nuevo elemento para crear nuevos archivos de código, o a Proyecto > Agregar elemento existente para agregar archivos de código existentes al proyecto
-//   6. En el futuro, para volver a abrir este proyecto, vaya a Archivo > Abrir > Proyecto y seleccione el archivo .sln
