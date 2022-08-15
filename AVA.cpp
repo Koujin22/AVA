@@ -2,10 +2,35 @@
 //
 
 #include <iostream>
+#include "FrameworkManager.hpp"
+#include "ConfigurationManager.hpp"
+#include "Logging.hpp"
+
+
+
+using namespace std;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    cout << "##########################################################" << endl;
+    cout << "||                                                      ||" << endl;
+    cout << "||                        A.V.A.                        ||" << endl;
+    cout << "||                                                      ||" << endl;
+    cout << "##########################################################" << endl;
+
+    LoggerFactory::SetLoggingLevel(DEBUG);
+    config.LoadConfigurations("dev");
+
+    FrameworkManager* framework_manager = new FrameworkManager();
+
+    framework_manager->Setup();
+
+    framework_manager->ListenForWakeUpWord();
+
+    framework_manager->Say("TESTEO 123");
+
+    delete framework_manager;
+
 }
 
 // Ejecutar programa: Ctrl + F5 o menú Depurar > Iniciar sin depurar

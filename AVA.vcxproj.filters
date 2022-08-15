@@ -13,10 +13,74 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de origen\Framework">
+      <UniqueIdentifier>{c8e89344-b320-4d5d-a46f-2530ea4901d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Framework">
+      <UniqueIdentifier>{222401d9-4edf-4788-924f-90def509624c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Util">
+      <UniqueIdentifier>{aab9d6dd-1a27-4d6e-a30a-7e04f80baebe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Util">
+      <UniqueIdentifier>{18231485-d84c-495a-af28-fb7fc6cdab8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Framework\Interface">
+      <UniqueIdentifier>{0a00e0dd-053c-46ba-a361-371c71bbb4f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="FrameworkManager.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="PicoWakeUpService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationManager.cpp">
+      <Filter>Archivos de origen\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="IFrameworkService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="GoogleTextToSpeechService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FrameworkManager.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="PicoWakeUpService.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigurationManager.hpp">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Logging.hpp">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="IWakeUpService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ITextToSpeechService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="GoogleTextToSpeechService.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\dev.properties">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="lib\porcupine\libpv_porcupine.dll">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="lib\pvrecorder\libpv_recorder.dll">
+      <Filter>Archivos de recursos</Filter>
+    </None>
   </ItemGroup>
 </Project>

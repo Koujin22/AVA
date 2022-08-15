@@ -88,11 +88,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\world\Documents\Personal\AVA\lib\porcupine\include;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\world\Documents\Personal\AVA\lib\pvrecorder;C:\Users\world\Documents\Personal\AVA\lib\porcupine</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
+copy "$(SolutionDir)lib\porcupine\porcupine.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -116,11 +124,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\world\Documents\Personal\AVA\lib\porcupine\include;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\world\Documents\Personal\AVA\lib\pvrecorder;C:\Users\world\Documents\Personal\AVA\lib\porcupine</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
+copy "$(SolutionDir)lib\porcupine\porcupine.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -140,6 +156,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp" />
+    <ClCompile Include="ConfigurationManager.cpp" />
+    <ClCompile Include="FrameworkManager.cpp" />
+    <ClCompile Include="GoogleTextToSpeechService.cpp" />
+    <ClCompile Include="IFrameworkService.hpp" />
+    <ClCompile Include="PicoWakeUpService.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConfigurationManager.hpp" />
+    <ClInclude Include="FrameworkManager.hpp" />
+    <ClInclude Include="GoogleTextToSpeechService.hpp" />
+    <ClInclude Include="ITextToSpeechService.hpp" />
+    <ClInclude Include="IWakeUpService.hpp" />
+    <ClInclude Include="Logging.hpp" />
+    <ClInclude Include="PicoWakeUpService.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lib\porcupine\libpv_porcupine.dll" />
+    <None Include="lib\pvrecorder\libpv_recorder.dll" />
+    <None Include="resources\dev.properties" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
