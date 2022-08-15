@@ -19,17 +19,18 @@ PicoWakeUpService::PicoWakeUpService(std::shared_ptr<IMicrophoneService> microph
 void PicoWakeUpService::StartPurcopine() {
     LogDebug() << "Starting purcopine...";
     LogVerbose() << "Getting configuration variables...";
+    const int num_keyword_files = std::stoi(config.GetConfiguration("num_keyword_files"));
     static const char* acces_key = config.GetConfiguration("acces_key").c_str();
     const char* model_file_path = config.GetConfiguration("porcupine_model_file_path").c_str();
-    const char* keyword_file_path = config.GetConfiguration("keyword_file_path").c_str();
+    const char* keyword_file_path[] = { config.GetConfiguration("keyword_file_path").c_str() };
     const float sensitivity = std::stof(config.GetConfiguration("porcupine_sensitivity"));
 
     LogVerbose() << "initiating purcopin.";
     const pv_status_t status = pv_porcupine_init(
         acces_key,
         model_file_path,
-        1,
-        &keyword_file_path,
+        num_keyword_files,
+        keyword_file_path,
         &sensitivity,
         &porcupine_);
 
