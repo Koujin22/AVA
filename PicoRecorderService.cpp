@@ -53,11 +53,25 @@ void PicoRecorderService::StopMic() {
 }
 
 void PicoRecorderService::GetPcm(int16_t* pcm) {
+
     pv_recorder_status_t recorder_status = pv_recorder_read(recorder_, pcm);
     if (recorder_status != PV_RECORDER_STATUS_SUCCESS) {
         LogError() << "Error while trying to read microhpone. " << pv_recorder_status_to_string(recorder_status);
     }
 }
+
+
+void PicoRecorderService::FlushPcm(int16_t* pcm) {
+    for (int i = 0; i < 10; i++) {
+
+        pv_recorder_status_t recorder_status = pv_recorder_read(recorder_, pcm);
+        if (recorder_status != PV_RECORDER_STATUS_SUCCESS) {
+            LogError() << "Error while trying to read microhpone. " << pv_recorder_status_to_string(recorder_status);
+        }
+
+    }
+}
+
 
 PicoRecorderService::~PicoRecorderService() {
     LogInfo() << "Shuting down microphone service...";

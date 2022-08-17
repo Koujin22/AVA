@@ -6,6 +6,7 @@
 #include "PicoIntent.hpp"
 #include <memory>
 
+#include "GoogleSpeechToTextService.hpp"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ namespace ConstStr {
 
 int main()
 {
+
     cout << "##########################################################" << endl;
     cout << "||                                                      ||" << endl;
     cout << "||                        A.V.A.                        ||" << endl;
@@ -29,8 +31,10 @@ int main()
     LoggerFactory::SetLoggingLevel(VERBOSE);
     config.LoadConfigurations("dev");
 
-    FrameworkManager* framework_manager = new FrameworkManager();
+    GoogleSpeechToTextService* x = new GoogleSpeechToTextService();
+    x->GetText("");
 
+   /* FrameworkManager* framework_manager = new FrameworkManager();
     framework_manager->SaySsml(ConstStr::welcome);
 
     bool turn_off = false;
@@ -51,13 +55,13 @@ int main()
                 understood = true;
                 turn_off = true;
             } else {
+                cout << "Intent understod yet it is not implemented yet." << endl;
                 understood = true;
             }
             intent.reset();
         }
     }
 
-    delete framework_manager;
-
+    delete framework_manager;*/
     return 0;
 }

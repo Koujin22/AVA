@@ -4,7 +4,6 @@
 #include <mmsystem.h>
 #include <Windows.h>
 #include <regex>
-#define _CRTDBG_MAP_ALLOC
 
 using std::string, std::regex, std::regex_replace;
 

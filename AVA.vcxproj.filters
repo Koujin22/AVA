@@ -54,6 +54,9 @@
     <ClCompile Include="PicoIntent.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="GoogleSpeechToTextService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FrameworkManager.hpp">
@@ -94,6 +97,12 @@
     </ClInclude>
     <ClInclude Include="PicoIntent.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ISpeechToText.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="GoogleSpeechToTextService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

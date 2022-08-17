@@ -8,6 +8,9 @@
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
+
+#include <iostream>
 
 
 PicoWakeUpService::PicoWakeUpService(std::shared_ptr<IMicrophoneService> microphone_service) : LoggerFactory(this), microhpone_{ microphone_service } {
@@ -21,17 +24,24 @@ void PicoWakeUpService::StartPurcopine() {
     LogVerbose() << "Getting configuration variables...";
     const int num_keyword_files = std::stoi(config.GetConfiguration("num_keyword_files"));
     static const char* acces_key = config.GetConfiguration("acces_key").c_str();
+    //delete on test_tmp, test y sensitivity;
     const char* model_file_path = config.GetConfiguration("porcupine_model_file_path").c_str();
-    const char* keyword_file_path[] = { config.GetConfiguration("keyword_file_path").c_str() };
-    const float sensitivity = std::stof(config.GetConfiguration("porcupine_sensitivity"));
+    std::string* test_tmp = new std::string[num_keyword_files];
+    const char** test = new const char* [num_keyword_files];
+    float* sensitivity = new float[num_keyword_files];
+    for (int i = 0; i < num_keyword_files; i++) {
+        test_tmp[i] = config.GetConfigurationFromString("keyword_file_path", i);
+        test[i] = test_tmp[i].c_str();
+        sensitivity[i] = std::stof(config.GetConfiguration("porcupine_sensitivity"));
+    }
 
     LogVerbose() << "initiating purcopin.";
     const pv_status_t status = pv_porcupine_init(
         acces_key,
         model_file_path,
         num_keyword_files,
-        keyword_file_path,
-        &sensitivity,
+        test,
+        sensitivity,
         &porcupine_);
 
     if (status != PV_STATUS_SUCCESS) {
@@ -45,6 +55,10 @@ void PicoWakeUpService::StartPurcopine() {
         LogError() << "Failed to allocate pcm memory.";
         exit(1);
     }
+
+    delete[] test_tmp;
+    delete[] test;
+    delete[] sensitivity;
 
     LogDebug() << "Purcopine ready!";
 }
@@ -61,6 +75,8 @@ void PicoWakeUpService::StopPurcopine() {
 
 void PicoWakeUpService::WaitForWakeUp() {
     LogInfo() << "Start processing audo. Listening for wake-up words.";
+    microhpone_->FlushPcm(pcm_);
+
     volatile bool word_detected = false;
     while (!word_detected) {
         microhpone_->GetPcm(pcm_);
@@ -70,6 +86,7 @@ void PicoWakeUpService::WaitForWakeUp() {
             word_detected = true;
         }
     }
+    
     LogInfo() << "Detected wake-up word!";
     
 }

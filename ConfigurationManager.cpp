@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <iostream>
 #include <stdlib.h>  
+#include <vector>
 
 using std::string;
 
@@ -63,6 +64,21 @@ const string& ConfigurationManager::GetConfiguration(string name) {
         LogError() << "Could not find configuration with key: " << name << ". Please provide key value pair on file.";
         exit(1);
     }
+}
+
+string ConfigurationManager::GetConfigurationFromString(std::string name, int index) {
+    if (index < 0) {
+        LogError() << "Not a positive index.";
+        exit(1);
+    }
+    string src = config_values_.at(name);
+    int start = 0;
+    int end = src.find(" ");
+    for (int i = 0; i < index; i++) {
+        src.erase(start, end + 1);
+        end = src.find(" ");
+    }
+    return src.substr(start, end);
 }
 
 ConfigurationManager config;

@@ -1,7 +1,7 @@
 #pragma once
 #include "ITextToSpeechService.hpp"
 #include "Logging.hpp"
-
+#include <memory>
 
 namespace google::cloud::texttospeech{
 	inline namespace v2_1_0 {

@@ -13,6 +13,7 @@ class PicoRecorderService : public IMicrophoneService, private LoggerFactory {
 public:
 	PicoRecorderService();
 	void GetPcm(int16_t*);
+	void FlushPcm(int16_t*);
 	~PicoRecorderService();
 private:
 	void StartMic();
