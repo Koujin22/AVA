@@ -181,7 +181,7 @@ copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
     <ClInclude Include="IIntent.hpp" />
     <ClInclude Include="IMicrophoneService.hpp" />
     <ClInclude Include="ISpeechToIntentService.hpp" />
-    <ClInclude Include="ISpeechToText.hpp" />
+    <ClInclude Include="ISpeechToTextService.hpp" />
     <ClInclude Include="ITextToSpeechService.hpp" />
     <ClInclude Include="IWakeUpService.hpp" />
     <ClInclude Include="Logging.hpp" />

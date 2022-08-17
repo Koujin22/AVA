@@ -1,9 +1,6 @@
 #pragma once
 #include "IMicrophoneService.hpp"
 #include "Logging.hpp"
-#include <memory>
-#include <functional>
-
 
 class IMicrophoneService;
 

@@ -1,44 +1,55 @@
 #include "GoogleSpeechToTextService.hpp"
-#include "google/cloud/speech/speech_client.h"
-#include <fstream>
-#include <string>
+#include <google/cloud/speech/speech_client.h>
+#include "IMicrophoneService.hpp"
 
-using namespace std;
 
-GoogleSpeechToTextService::GoogleSpeechToTextService() : LoggerFactory(this) {
-	microphone_ = new PicoRecorderService();
+namespace speech = google::cloud::speech;
+
+
+GoogleSpeechToTextService::GoogleSpeechToTextService(std::shared_ptr<IMicrophoneService> microphone_ptr) : LoggerFactory(this), microhpone_{ microphone_ptr } {
+	LogInfo() << "Starting speech-to-text service...";
+	LogDebug() << "Creating connection to googlee speech-to-text service";
+	client_ = new speech::SpeechClient(speech::MakeSpeechConnection());
+	pcm_ = static_cast<int16_t*>(malloc(512 * sizeof(int16_t)));
+	if (!pcm_) {
+		LogError() << "Failed to allocate pcm memory.";
+		exit(1);
+	}
+	LogInfo() << "Speech-to-text service ready!";
 }
 
-std::string GoogleSpeechToTextService::GetText(std::string tests) {
-
-	int64_t max = 100;
-	
-
-	int16_t** test = new int16_t * [100]();
-
+std::string GoogleSpeechToTextService::Record(int seconds) {
+	LogVerbose() << "Recording for " << seconds << " seconds.";
+	int64_t max = 40 * seconds;
+	std::stringstream data;
 	for (int64_t i = 0; i < max; i++) {
-		int16_t* tmp = static_cast<int16_t*>(malloc(512 * sizeof(int16_t)));
-		test[i] = tmp;
-		microphone_->GetPcm(tmp);
-		if (i % 10 == 0) {
-			std::cout << i << std::endl;
+
+		microhpone_->GetPcm(pcm_);
+
+		for (int64_t j = 0; j < 512; j++) {
+			data.write((char*)&pcm_[j], 2);
 		}
 	}
 
+	return data.str();
+}
+
+std::string GoogleSpeechToTextService::MakeFile(std::string& raw_pcm, int seconds) {
+	LogVerbose() << "Creating wave file in-memory";
 	const char* riff = "RIFF";
-	int32_t num = 512 * 2 * max;
+	int32_t num = 512 * 2 * 40 * seconds;
 	const char* wave = "WAVEfmt ";
 	//               |   size of next part  |  PCM = 16 | chanels 1 | 
-	char empty[8] = { 0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00 }; 
+	char empty[8] = { 0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00 };
 	//sampRate  16000       
 	int32_t sampRate = 16000;
 	//byterate
 	int32_t byteRate = sampRate * 2;
 	//               | numChl*2 |   16       |
-	char form [4] = { 0x02, 0x00, 0x10, 0x00 };
+	char form[4] = { 0x02, 0x00, 0x10, 0x00 };
 	const char* data = "data";
 	char size[4] = { 0x00, 0x90, 0x10, 0x00 };
-	ofstream file("file.wav", ios::binary);
+	std::stringstream file;
 	file.write(riff, 4);
 	file.write((char*)&num, 4);
 	file.write(wave, 8);
@@ -48,35 +59,37 @@ std::string GoogleSpeechToTextService::GetText(std::string tests) {
 	file.write(form, 4);
 	file.write(data, 4);
 	file.write(size, 4);
-	for (int64_t i = 0; i < max; i++) {
-		int16_t* current_frame = test[i];
-		for (int64_t j = 0; j < 512; j++) {
-			file.write((char*)&current_frame[j], 2);
-		}
-	}
-	file.close();
+	file << raw_pcm;
 
-	std::ifstream in("file.wav", std::ios::in | std::ios::binary);
-	std::string contents;
-	in.seekg(0, std::ios::end);
-	contents.resize(in.tellg());
-	in.seekg(0, std::ios::beg);
-	in.read(&contents[0], contents.size());
-	in.close();
-	auto client = google::cloud::speech::SpeechClient(google::cloud::speech::MakeSpeechConnection());
+	return file.str();
+}
 
-	google::cloud::speech::v1::RecognitionConfig config;
-	config.set_language_code("es-mx");
-	google::cloud::speech::v1::RecognitionAudio audio;
-	audio.set_content(contents);
-	auto response = client.Recognize(config, audio);
+std::string GoogleSpeechToTextService::GetText(int seconds) {
+
+	std::string raw_data = Record(seconds);
+	std::string wav_file = MakeFile(raw_data, seconds);
+	LogInfo() << "Sending audio to google to process";
+	speech::v1::RecognitionConfig config;
+	config.set_language_code("es-us");
+	speech::v1::RecognitionAudio audio;
+	audio.set_content(wav_file);
+
+	google::cloud::v2_1_0::StatusOr<speech::v1::RecognizeResponse> response;
+	response = client_->Recognize(config, audio);
+
 	if (!response) throw std::runtime_error(response.status().message());
-	std::cout << response->DebugString() << "\n";
-
-	
-	return "asdf";
+	LogDebug() << "Debug info: " << response->DebugString();
+	std::string result = response->results().Get(0).alternatives(0).transcript();
+	LogInfo() << "Process audio: " << result;
+	return result;
 }
 
 GoogleSpeechToTextService::~GoogleSpeechToTextService() {
-	delete microphone_;
+
+	LogInfo() << "Shuting down speech-to-text service...";
+	delete client_;
+	LogVerbose() << "Freeing pcm...";
+	free(pcm_);
+	LogInfo() << "Speech-to-text service has been shut down.";
 }
+//speech-to-text 

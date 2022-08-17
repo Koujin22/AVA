@@ -10,5 +10,4 @@ public:
 	std::string GetParameter(std::string);
 	int GetParametersSizer();
 	~PicoIntent() {};
-
 };

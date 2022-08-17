@@ -1,20 +1,22 @@
 #pragma once
 #include "ITextToSpeechService.hpp"
 #include "Logging.hpp"
-#include <memory>
 
-namespace google::cloud::texttospeech{
-	inline namespace v2_1_0 {
-		class TextToSpeechClient;
-	}
-	inline namespace v1 {
-		class SynthesisInput;
-		class VoiceSelectionParams;
-		class AudioConfig;
+namespace google{
+	namespace cloud {
+		namespace texttospeech {
+			inline namespace v2_1_0 {
+				class TextToSpeechClient;
+			}
+			inline namespace v1 {
+				class SynthesisInput;
+				class VoiceSelectionParams;
+				class AudioConfig;
+			}
+		}
 	}
 }
 
-namespace texttospeech = google::cloud::texttospeech;
 
 class GoogleTextToSpeechService : public ITextToSpeechService, private LoggerFactory {
 public:
@@ -25,14 +27,14 @@ public:
 protected:
 	std::string SsmlToString(std::string);
 private:
-	void Say(texttospeech::SynthesisInput&);
+	void Say(google::cloud::texttospeech::v1::SynthesisInput&);
 	void PlayAudio(std::string);
 	std::string Synthezise(
-		texttospeech::SynthesisInput&,
-		texttospeech::VoiceSelectionParams&,
-		texttospeech::AudioConfig&);
+		google::cloud::texttospeech::v1::SynthesisInput&,
+		google::cloud::texttospeech::v1::VoiceSelectionParams&,
+		google::cloud::texttospeech::v1::AudioConfig&);
 	
-	texttospeech::TextToSpeechClient* client_;
+	google::cloud::texttospeech::v2_1_0::TextToSpeechClient* client_;
 	std::string language_code_ = "en-US";
 	std::string voice_name_ = "en-US-Wavenet-F";
 

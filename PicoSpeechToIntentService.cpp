@@ -1,5 +1,6 @@
 #include "PicoSpeechToIntentService.hpp"
 #include "ConfigurationManager.hpp"
+#include "IMicrophoneService.hpp"
 #include "PicoIntent.hpp"
 #include <pv_rhino.h>
 

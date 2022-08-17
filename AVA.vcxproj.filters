@@ -98,11 +98,11 @@
     <ClInclude Include="PicoIntent.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="ISpeechToText.hpp">
+    <ClInclude Include="ISpeechToTextService.hpp">
       <Filter>Archivos de encabezado\Framework\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GoogleSpeechToTextService.hpp">
-      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+      <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

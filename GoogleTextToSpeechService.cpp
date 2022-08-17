@@ -2,7 +2,6 @@
 #include "GoogleTextToSpeechService.hpp"
 #include <google/cloud/texttospeech/text_to_speech_client.h>
 #include <mmsystem.h>
-#include <Windows.h>
 #include <regex>
 
 using std::string, std::regex, std::regex_replace;

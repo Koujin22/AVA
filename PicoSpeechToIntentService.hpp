@@ -1,11 +1,9 @@
 #pragma once
-#include "ISpeechToIntentService.hpp"
 #include "Logging.hpp"
-#include "IMicrophoneService.hpp"
-#include <memory>
-
+#include "ISpeechToIntentService.hpp"
 
 typedef struct pv_rhino pv_rhino_t;
+class IMicrophoneService;
 
 class PicoSpeechToIntentService : public ISpeechToIntentService, private LoggerFactory {
 public:

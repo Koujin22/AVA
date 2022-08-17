@@ -1,7 +1,6 @@
 #pragma once
 #include "Logging.hpp"
 #include <map>
-#include <vector>
 
 class ConfigurationManager : private LoggerFactory {
 

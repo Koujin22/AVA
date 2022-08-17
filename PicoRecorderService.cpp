@@ -62,7 +62,7 @@ void PicoRecorderService::GetPcm(int16_t* pcm) {
 
 
 void PicoRecorderService::FlushPcm(int16_t* pcm) {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 40; i++) {
 
         pv_recorder_status_t recorder_status = pv_recorder_read(recorder_, pcm);
         if (recorder_status != PV_RECORDER_STATUS_SUCCESS) {

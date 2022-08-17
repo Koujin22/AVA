@@ -1,10 +1,9 @@
 #pragma once
 #include "IWakeUpService.hpp"
-#include "IMicrophoneService.hpp"
 #include "Logging.hpp"
-#include <memory>
 
 typedef struct pv_porcupine pv_porcupine_t;
+class IMicrophoneService;
 
 class PicoWakeUpService : public IWakeUpService, private LoggerFactory {
 public:

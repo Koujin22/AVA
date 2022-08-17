@@ -4,7 +4,7 @@
 
 class IIntent {
 public:
-	~IIntent() {};
+	virtual ~IIntent() {};
 	virtual std::string GetModule() = 0;
 	virtual std::string GetAction() = 0;
 	virtual std::map<std::string, std::string> GetParameters() = 0;

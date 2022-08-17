@@ -3,14 +3,8 @@
 
 #include "PicoWakeUpService.hpp"
 #include "ConfigurationManager.hpp"
-#include "PicoRecorderService.hpp"
+#include "IMicrophoneService.hpp"
 #include <pv_porcupine.h>
-#include <cstring>
-#include <iostream>
-#include <cstdlib>
-#include <vector>
-
-#include <iostream>
 
 
 PicoWakeUpService::PicoWakeUpService(std::shared_ptr<IMicrophoneService> microphone_service) : LoggerFactory(this), microhpone_{ microphone_service } {
