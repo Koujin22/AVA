@@ -27,7 +27,6 @@ void GoogleTextToSpeechService::SaySsml(string msg) {
 }
 
 void GoogleTextToSpeechService::Say(texttospeech::SynthesisInput& input) {
-	LogDebug() << "Configuring synthesizer";
 	LogVerbose() << "Setting language code.";
 	texttospeech::VoiceSelectionParams voice_config;
 	voice_config.set_language_code(language_code_);
@@ -52,7 +51,8 @@ string GoogleTextToSpeechService::Synthezise(
 	
 
 	//Save response
-	LogDebug() << "Synthezising";
+
+	LogVerbose() << "Synthezising";
 	google::cloud::v2_1_0::StatusOr<texttospeech::v1::SynthesizeSpeechResponse> response;
 	response = client_->SynthesizeSpeech(input, voice, audio);
 	if (!response) throw std::runtime_error(response.status().message());
@@ -60,14 +60,14 @@ string GoogleTextToSpeechService::Synthezise(
 }
 
 void GoogleTextToSpeechService::PlayAudio(string audio_content) {
-	LogDebug() << "Playing audio";
+	LogVerbose() << "Playing audio";
 	PlaySoundW((LPCTSTR)audio_content.c_str(), NULL, SND_MEMORY | SND_ASYNC);
 }
 
 GoogleTextToSpeechService::GoogleTextToSpeechService() : LoggerFactory(this) {
 	LogInfo() << "Starting text-to-speech service...";
 	//Create client
-	LogDebug() << "Creating connection to googlee text-to-speech service";
+	LogVerbose() << "Creating connection to googlee text-to-speech service";
 	client_ = new texttospeech::TextToSpeechClient(
 		texttospeech::MakeTextToSpeechConnection());
 

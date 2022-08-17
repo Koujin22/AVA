@@ -11,8 +11,7 @@ PicoSpeechToIntentService::PicoSpeechToIntentService(std::shared_ptr<IMicrophone
 }
 
 void PicoSpeechToIntentService::StartRhino() {
-
-    LogDebug() << "Starting rhino...";
+    
     LogVerbose() << "Getting configuration variables...";
     static const char* acces_key = config.GetConfiguration("acces_key").c_str();
     const char* model_file_path = config.GetConfiguration("rhino_model_file_path").c_str();
@@ -37,22 +36,20 @@ void PicoSpeechToIntentService::StartRhino() {
 
     const int32_t frame_length = pv_rhino_frame_length();
 
-
+    LogDebug() << "Rhino frame length: " << frame_length;
+    LogVerbose() << "Starting pcm malloc";
     pcm_ = static_cast<int16_t*>(malloc(frame_length * sizeof(int16_t)));
     if (!pcm_) {
         LogError() << "Failed to allocate pcm memory.";
         exit(1);
     }
-
-    LogDebug() << "Rhino ready!";
 }
 
 void PicoSpeechToIntentService::StopRhino() {
-    LogDebug() << "Shutting down rhino...";
+    LogVerbose() << "Shutting down rhino...";
     pv_rhino_delete(rhino_);
     LogVerbose() << "Freeing pcm...";
     free(pcm_);
-    LogDebug() << "Rhino has been shut down.";
 }
 
 IIntent* PicoSpeechToIntentService::GetIntent() {

@@ -24,7 +24,7 @@ int main()
     cout << "||                                                      ||" << endl;
     cout << "##########################################################" << endl;
 
-    LoggerFactory::SetLoggingLevel(VERBOSE);
+    LoggerFactory::SetLoggingLevel(INFO);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();

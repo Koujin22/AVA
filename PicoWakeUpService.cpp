@@ -14,7 +14,6 @@ PicoWakeUpService::PicoWakeUpService(std::shared_ptr<IMicrophoneService> microph
 };
 
 void PicoWakeUpService::StartPurcopine() {
-    LogDebug() << "Starting purcopine...";
     LogVerbose() << "Getting configuration variables...";
     const int num_keyword_files = std::stoi(config.GetConfiguration("num_keyword_files"));
     static const char* acces_key = config.GetConfiguration("acces_key").c_str();
@@ -44,27 +43,28 @@ void PicoWakeUpService::StartPurcopine() {
 
     const int32_t frame_length = pv_porcupine_frame_length();
 
+    LogDebug() << "Framelength from porcupine: " << frame_length;
+    LogVerbose() << "Starting pcm malloc.";
+
     pcm_ = static_cast<int16_t*>(malloc(frame_length * sizeof(int16_t)));
     if (!pcm_) {
         LogError() << "Failed to allocate pcm memory.";
         exit(1);
     }
 
+    LogVerbose() << "Deleting temporal array containers.";
+
     delete[] test_tmp;
     delete[] test;
     delete[] sensitivity;
-
-    LogDebug() << "Purcopine ready!";
 }
 
-
 void PicoWakeUpService::StopPurcopine() {
-    LogDebug() << "Shutting down purcopine...";
+    LogVerbose() << "Shutting down purcopine...";
     pv_porcupine_delete(porcupine_);
 
     LogVerbose() << "Freeing pcm...";
     free(pcm_);
-    LogDebug() << "Purcopine has been shut down.";
 }
 
 void PicoWakeUpService::WaitForWakeUp() {

@@ -11,7 +11,7 @@ void ConfigurationManager::LoadConfigurations(string env){
 
     string buffer;
 
-    LogInfo() << "Loading config values";
+    LogInfo() << "Initializing config values";
 
     std::ifstream config_file("./resources/dev.properties");
 
@@ -31,6 +31,7 @@ void ConfigurationManager::LoadConfigurations(string env){
 
         if (buffer.at(0) == '~') {
             setting_env = true;
+            LogDebug() << "Setting env variables";
             continue;
         }
 
@@ -50,7 +51,6 @@ void ConfigurationManager::LoadConfigurations(string env){
         } else {
             int i = _putenv(buffer.c_str());
         }
-
     }
 
     config_file.close();
@@ -78,6 +78,8 @@ string ConfigurationManager::GetConfigurationFromString(std::string name, int in
         src.erase(start, end + 1);
         end = src.find(" ");
     }
+
+
     return src.substr(start, end);
 }
 

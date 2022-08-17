@@ -8,9 +8,11 @@ namespace speech = google::cloud::speech;
 
 GoogleSpeechToTextService::GoogleSpeechToTextService(std::shared_ptr<IMicrophoneService> microphone_ptr) : LoggerFactory(this), microhpone_{ microphone_ptr } {
 	LogInfo() << "Starting speech-to-text service...";
-	LogDebug() << "Creating connection to googlee speech-to-text service";
+	LogVerbose() << "Creating connection to googlee speech-to-text service";
 	client_ = new speech::SpeechClient(speech::MakeSpeechConnection());
+	LogDebug() << "Google speech-to-text frame length: " << 512;
 	pcm_ = static_cast<int16_t*>(malloc(512 * sizeof(int16_t)));
+	LogVerbose() << "Starting pcm malloc";
 	if (!pcm_) {
 		LogError() << "Failed to allocate pcm memory.";
 		exit(1);
@@ -65,15 +67,16 @@ std::string GoogleSpeechToTextService::MakeFile(std::string& raw_pcm, int second
 }
 
 std::string GoogleSpeechToTextService::GetText(int seconds) {
-
+	LogInfo() << "Listening for audio to converrt into text for " << seconds << " seconds.";
 	std::string raw_data = Record(seconds);
 	std::string wav_file = MakeFile(raw_data, seconds);
-	LogInfo() << "Sending audio to google to process";
+	LogVerbose() << "Setting audio and recognition config";
 	speech::v1::RecognitionConfig config;
 	config.set_language_code("es-us");
 	speech::v1::RecognitionAudio audio;
 	audio.set_content(wav_file);
 
+	LogVerbose() << "Sending audio to google to process";
 	google::cloud::v2_1_0::StatusOr<speech::v1::RecognizeResponse> response;
 	response = client_->Recognize(config, audio);
 

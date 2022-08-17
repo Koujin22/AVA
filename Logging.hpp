@@ -38,14 +38,16 @@ public:
 
 		}
 		if (newLevel >= 3) {
-			std::cout << "|   INFO|                 Logger | Setting log level to " << string_new_level << std::endl;
+			std::cout << "|"<< GetColorSequence(COLORS::GREEN) << "   INFO" << "\x1B[0m" << "|                 Logger | Setting log level to " << string_new_level << std::endl;
 		}
 	}
 
 protected:
 	enum class COLORS {
 		RED,
+		GREEN,
 		DEFAULT,
+		BLUE,
 		YELLOW
 	};
 
@@ -75,8 +77,8 @@ protected:
 
 	Logger LogError() { return Log("ERROR", level >= 1, COLORS::RED);  }
 	Logger LogWarn() { return Log("WARN", level >= 2, COLORS::YELLOW); }
-	Logger LogInfo() { return Log("INFO", level >= 3); }
-	Logger LogDebug() { return Log("DEBUG", level >= 4); }
+	Logger LogInfo() { return Log("INFO", level >= 3, COLORS::GREEN); }
+	Logger LogDebug() { return Log("DEBUG", level >= 4, COLORS::BLUE); }
 	Logger LogVerbose() { return Log("VERBOSE", level >= 5); }
 
 	Logger Log(std::string level, bool will_print, COLORS color = COLORS::DEFAULT) {
@@ -94,6 +96,10 @@ private:
 			return "\x1B[31m";
 		case COLORS::YELLOW:
 			return "\x1B[33m";
+		case COLORS::GREEN:
+			return "\x1B[32m";
+		case COLORS::BLUE:
+			return "\x1B[34m";
 		case COLORS::DEFAULT:
 			return "\x1B[0m";
 		default:
