@@ -1,5 +1,5 @@
 #include "GoogleSpeechToTextService.hpp"
-
+#include "google/cloud/speech/speech_client.h"
 #include <fstream>
 #include <string>
 
@@ -56,16 +56,22 @@ std::string GoogleSpeechToTextService::GetText(std::string tests) {
 	}
 	file.close();
 
-	//namespace speech = ::google::cloud::speech;
-	//auto client = speech::speechclient(speech::makespeechconnection());
+	std::ifstream in("file.wav", std::ios::in | std::ios::binary);
+	std::string contents;
+	in.seekg(0, std::ios::end);
+	contents.resize(in.tellg());
+	in.seekg(0, std::ios::beg);
+	in.read(&contents[0], contents.size());
+	in.close();
+	auto client = google::cloud::speech::SpeechClient(google::cloud::speech::MakeSpeechConnection());
 
-	//google::cloud::speech::v1::recognitionconfig config;
-	//config.set_language_code("en-us");
-	//google::cloud::speech::v1::recognitionaudio audio;
-	//audio.set_content(str);
-	//auto response = client.recognize(config, audio);
-	//if (!response) throw std::runtime_error(response.status().message());
-	//std::cout << response->debugstring() << "\n";
+	google::cloud::speech::v1::RecognitionConfig config;
+	config.set_language_code("es-mx");
+	google::cloud::speech::v1::RecognitionAudio audio;
+	audio.set_content(contents);
+	auto response = client.Recognize(config, audio);
+	if (!response) throw std::runtime_error(response.status().message());
+	std::cout << response->DebugString() << "\n";
 
 	
 	return "asdf";
