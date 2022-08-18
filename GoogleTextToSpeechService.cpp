@@ -8,28 +8,46 @@ using std::string, std::regex, std::regex_replace;
 
 namespace texttospeech = google::cloud::texttospeech;
 
-void GoogleTextToSpeechService::SayText(string msg) {
+void GoogleTextToSpeechService::SayText(string msg, string lang) {
 
 	LogInfo() << "Saying plain text: " << msg;
 
 	google::cloud::texttospeech::SynthesisInput input;
 	input.set_text(msg);
-	Say(input);
+	Say(input, lang, false);
 }
 
-void GoogleTextToSpeechService::SaySsml(string msg) {
+void GoogleTextToSpeechService::SaySsml(string msg, string lang) {
 
 	LogInfo() << "Saying in ssml: " << SsmlToString(msg);
 
 	google::cloud::texttospeech::SynthesisInput input;
 	input.set_ssml(msg);
-	Say(input);
+	Say(input, lang, false);
 }
 
-void GoogleTextToSpeechService::Say(texttospeech::SynthesisInput& input) {
-	LogVerbose() << "Setting language code.";
+void GoogleTextToSpeechService::SayTextAsync(string msg, string lang) {
+
+	LogInfo() << "Saying async plain text: " << msg;
+
+	google::cloud::texttospeech::SynthesisInput input;
+	input.set_text(msg);
+	Say(input, lang, true);
+}
+
+void GoogleTextToSpeechService::SaySsmlAsync(string msg, string lang) {
+
+	LogInfo() << "Saying async in ssml: " << SsmlToString(msg);
+
+	google::cloud::texttospeech::SynthesisInput input;
+	input.set_ssml(msg);
+	Say(input, lang, true);
+}
+
+void GoogleTextToSpeechService::Say(texttospeech::SynthesisInput& input, string lang, bool async) {
+	LogVerbose() << "Setting language code. Value: "<<lang;
 	texttospeech::VoiceSelectionParams voice_config;
-	voice_config.set_language_code(language_code_);
+	voice_config.set_language_code(lang);
 	//Set voice name
 	LogVerbose() << "Setting voice name";
 	voice_config.set_name(voice_name_);
@@ -40,7 +58,7 @@ void GoogleTextToSpeechService::Say(texttospeech::SynthesisInput& input) {
 
 	string audio = Synthezise(input, voice_config, audio_config);
 
-	PlayAudio(audio);
+	PlayAudio(audio, async);
 
 }
 
@@ -59,9 +77,15 @@ string GoogleTextToSpeechService::Synthezise(
 	return response->audio_content();
 }
 
-void GoogleTextToSpeechService::PlayAudio(string audio_content) {
+void GoogleTextToSpeechService::PlayAudio(string audio_content, bool async) {
 	LogVerbose() << "Playing audio";
-	PlaySoundW((LPCTSTR)audio_content.c_str(), NULL, SND_MEMORY | SND_ASYNC);
+	if (async) {
+		PlaySoundW((LPCTSTR)audio_content.c_str(), NULL, SND_MEMORY | SND_ASYNC);
+	}
+	else {
+		PlaySoundW((LPCTSTR)audio_content.c_str(), NULL, SND_MEMORY );
+
+	}
 }
 
 GoogleTextToSpeechService::GoogleTextToSpeechService() : LoggerFactory(this) {

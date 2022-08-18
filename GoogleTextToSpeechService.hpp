@@ -21,14 +21,16 @@ namespace google{
 class GoogleTextToSpeechService : public ITextToSpeechService, private LoggerFactory {
 public:
 	GoogleTextToSpeechService();
-	void SayText(std::string);
-	void SaySsml(std::string);
+	void SayText(std::string, std::string);
+	void SaySsml(std::string, std::string);
+	void SayTextAsync(std::string, std::string);
+	void SaySsmlAsync(std::string, std::string);
 	~GoogleTextToSpeechService();
 protected:
 	std::string SsmlToString(std::string);
 private:
-	void Say(google::cloud::texttospeech::v1::SynthesisInput&);
-	void PlayAudio(std::string);
+	void Say(google::cloud::texttospeech::v1::SynthesisInput&, std::string, bool async);
+	void PlayAudio(std::string, bool async);
 	std::string Synthezise(
 		google::cloud::texttospeech::v1::SynthesisInput&,
 		google::cloud::texttospeech::v1::VoiceSelectionParams&,

@@ -28,7 +28,7 @@ int main()
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();
-    framework_manager->SaySsml(ConstStr::welcome);
+    framework_manager->SaySsml(ConstStr::welcome, true);
 
     bool turn_off = false;
     bool understood = false;
@@ -53,8 +53,6 @@ int main()
                 framework_manager->SayText("What do you want me to write down?");
                 std::string dictation = framework_manager->GetText(10);
 
-                //async and sync methods and ability to change language
-                //Homogenar log levels
                 framework_manager->SayText("Okay, is " + dictation + " correct?");
 
             }

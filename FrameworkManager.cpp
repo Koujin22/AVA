@@ -25,12 +25,14 @@ string FrameworkManager::GetText(int seconds) {
 	return speech_to_text_service_->GetText(seconds);
 }
 
-void FrameworkManager::SayText(string msg) {
-	text_to_speech_service_->SayText(msg);
+void FrameworkManager::SayText(string msg, bool async, string language) {
+	if (async) text_to_speech_service_->SayTextAsync(msg, language);
+	else text_to_speech_service_->SayText(msg, language);
 }
 
-void FrameworkManager::SaySsml(string msg) {
-	text_to_speech_service_->SaySsml(msg);
+void FrameworkManager::SaySsml(string msg, bool async, string language) {
+	if (async) text_to_speech_service_->SaySsmlAsync(msg, language);
+	else text_to_speech_service_->SaySsml(msg, language);
 }
 
 IIntent* FrameworkManager::GetIntent() {

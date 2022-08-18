@@ -17,8 +17,8 @@ class FrameworkManager {
 public: 
 	FrameworkManager();
 	void ListenForWakeUpWord();
-	void SayText(std::string);
-	void SaySsml(std::string);
+	void SayText(std::string, bool async = false, std::string = "en-us");
+	void SaySsml(std::string, bool async = false, std::string = "en-us");
 	std::string GetText(int);
 	IIntent* GetIntent();
 	~FrameworkManager();
