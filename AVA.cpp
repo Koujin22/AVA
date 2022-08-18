@@ -18,16 +18,19 @@ int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    cout << "##########################################################" << endl;
-    cout << "||                                                      ||" << endl;
-    cout << "||                        A.V.A.                        ||" << endl;
-    cout << "||                                                      ||" << endl;
-    cout << "##########################################################" << endl;
+    cout << "###############################################################################" << endl;
+    cout << "||                                                                           ||" << endl;
+    cout << "||                                  A.V.A.                                   ||" << endl;
+    cout << "||                                                                           ||" << endl;
+    cout << "###############################################################################" << endl;
 
     LoggerFactory::SetLoggingLevel(INFO);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();
+    cout << "_______________________________________________________________________________" << endl;
+    cout << "|                               Framework ready!                              |" << endl;
+    cout << "-------------------------------------------------------------------------------" << endl;
     framework_manager->SaySsml(ConstStr::welcome, true);
 
     bool turn_off = false;
