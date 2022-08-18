@@ -50,7 +50,16 @@ void GoogleTextToSpeechService::Say(texttospeech::SynthesisInput& input, string 
 	voice_config.set_language_code(lang);
 	//Set voice name
 	LogVerbose() << "Setting voice name";
-	voice_config.set_name(voice_name_);
+	if (lang == "en-us") {
+		voice_config.set_name(voice_name_[0]);
+	}
+	else if (lang == "es-us") {
+		voice_config.set_name(voice_name_[1]);
+	}
+	else {
+		LogWarn() << "Lenguaje: " << lang << " no implementado. Usando default.";
+		voice_config.set_name(voice_name_[0]);
+	}
 	//Set audio config
 	LogVerbose() << "Setting audio encoding";
 	texttospeech::AudioConfig audio_config;

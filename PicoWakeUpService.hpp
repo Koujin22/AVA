@@ -13,6 +13,7 @@ public:
 private:
 	void StartPurcopine();
 	void StopPurcopine();
+	void Flush();
 
 	int16_t* pcm_ = nullptr;
 	std::shared_ptr<IMicrophoneService> microhpone_;

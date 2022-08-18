@@ -37,7 +37,6 @@ private:
 		google::cloud::texttospeech::v1::AudioConfig&);
 	
 	google::cloud::texttospeech::v2_1_0::TextToSpeechClient* client_;
-	std::string language_code_ = "en-US";
-	std::string voice_name_ = "en-US-Wavenet-F";
+	std::string voice_name_[2] = { "en-US-Wavenet-F", "es-US-Wavenet-A" };
 
 };

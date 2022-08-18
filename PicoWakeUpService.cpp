@@ -69,20 +69,29 @@ void PicoWakeUpService::StopPurcopine() {
 
 void PicoWakeUpService::WaitForWakeUp() {
     LogInfo() << "Start processing audo. Listening for wake-up words.";
-    microhpone_->FlushPcm(pcm_);
-
+    
+    Flush();
+    
     volatile bool word_detected = false;
+    int32_t keyword_index;
     while (!word_detected) {
         microhpone_->GetPcm(pcm_);
-        int32_t keyword_index;
         const pv_status_t status = pv_porcupine_process(porcupine_, pcm_, &keyword_index);
         if (keyword_index != -1) {
             word_detected = true;
         }
     }
     
-    LogInfo() << "Detected wake-up word!";
+    LogInfo() << "Detected wake-up word! Index: "<< keyword_index;
     
+}
+
+void PicoWakeUpService::Flush() {
+    int32_t dump;
+    for (int i = 0; i < 40; i++) {
+        microhpone_->GetPcm(pcm_);
+        pv_porcupine_process(porcupine_, pcm_, &dump);
+    }
 }
 
 PicoWakeUpService::~PicoWakeUpService() {

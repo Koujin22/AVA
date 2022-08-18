@@ -56,7 +56,7 @@ void PicoRecorderService::GetPcm(int16_t* pcm) {
 }
 
 void PicoRecorderService::FlushPcm(int16_t* pcm) {
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < 10; i++) {
         GetPcm(pcm);
     }
 }

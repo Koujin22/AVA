@@ -56,7 +56,9 @@ int main()
                 framework_manager->SayText("What do you want me to write down?");
                 std::string dictation = framework_manager->GetText(10);
 
-                framework_manager->SayText("Okay, is " + dictation + " correct?");
+                framework_manager->SayText("Okay, is ");
+                framework_manager->SayText(dictation, false, "es-us");
+                framework_manager->SayText("correct ? ");
 
             }
             else {
@@ -65,6 +67,7 @@ int main()
             }
             intent.reset();
         }
+        framework_manager->SayText("Goodbye sir");
     }
 
     delete framework_manager;
