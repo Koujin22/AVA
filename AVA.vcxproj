@@ -168,6 +168,7 @@ copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
     <ClCompile Include="FrameworkManager.cpp" />
     <ClCompile Include="GoogleSpeechToTextService.cpp" />
     <ClCompile Include="GoogleTextToSpeechService.cpp" />
+    <ClCompile Include="ModuleService.cpp" />
     <ClCompile Include="PicoIntent.cpp" />
     <ClCompile Include="PicoRecorderService.cpp" />
     <ClCompile Include="PicoSpeechToIntentService.cpp" />
@@ -180,11 +181,13 @@ copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
     <ClInclude Include="GoogleTextToSpeechService.hpp" />
     <ClInclude Include="IIntent.hpp" />
     <ClInclude Include="IMicrophoneService.hpp" />
+    <ClInclude Include="IModuleService.hpp" />
     <ClInclude Include="ISpeechToIntentService.hpp" />
     <ClInclude Include="ISpeechToTextService.hpp" />
     <ClInclude Include="ITextToSpeechService.hpp" />
     <ClInclude Include="IWakeUpService.hpp" />
     <ClInclude Include="Logging.hpp" />
+    <ClInclude Include="ModuleService.hpp" />
     <ClInclude Include="PicoIntent.hpp" />
     <ClInclude Include="PicoRecorderService.hpp" />
     <ClInclude Include="PicoSpeechToIntentService.hpp" />

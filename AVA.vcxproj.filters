@@ -57,6 +57,9 @@
     <ClCompile Include="GoogleSpeechToTextService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleService.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FrameworkManager.hpp">
@@ -102,6 +105,12 @@
       <Filter>Archivos de encabezado\Framework\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GoogleSpeechToTextService.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="IModuleService.hpp">
+      <Filter>Archivos de encabezado\Framework\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleService.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
   </ItemGroup>

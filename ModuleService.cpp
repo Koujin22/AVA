@@ -6,4 +6,4 @@ ModuleService::~ModuleService() {};
 
 void ModuleService::LoadModules() {
 
-};
+}; 
