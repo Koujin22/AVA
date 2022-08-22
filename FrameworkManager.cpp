@@ -6,15 +6,35 @@
 #include "PicoWakeUpService.hpp"
 #include "PicoRecorderService.hpp"
 
+#include <zmq.hpp>
+
+
 using std::string;
 
-FrameworkManager::FrameworkManager() : FrameworkManager(std::make_shared<PicoRecorderService>()) {};
-
+FrameworkManager::FrameworkManager() : 
+	FrameworkManager(std::make_shared<PicoRecorderService>()) {};
+	
 FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphone_service) :
+	LoggerFactory(this),
 	text_to_speech_service_{ new GoogleTextToSpeechService() },
 	wake_up_service_{ new PicoWakeUpService(microphone_service) },
 	speech_to_intent_service_{ new PicoSpeechToIntentService(microphone_service) },
-	speech_to_text_service_{ new GoogleSpeechToTextService(microphone_service) } {};
+	speech_to_text_service_{ new GoogleSpeechToTextService(microphone_service) },
+	zmq_context_{ new zmq::context_t(1) },
+	zmq_pub_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_PUB) },
+	zmq_rep_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_REP) }
+{ 
+	/*try {
+		LogDebug() << "Binding pub and rep sockets.";
+		zmq_pub_socket_->bind("tcp://127.0.0.1:5500");
+		zmq_rep_socket_->bind("tcp://127.0.0.1:5501");
+	}
+	catch(zmq::error_t &t) {
+		LogError() << t.what();
+		exit(1);
+	}*/
+
+};
 
 void FrameworkManager::ListenForWakeUpWord() {
 	wake_up_service_->WaitForWakeUp();
@@ -40,6 +60,9 @@ IIntent* FrameworkManager::GetIntent() {
 }
 
 FrameworkManager::~FrameworkManager() {
+	delete zmq_pub_socket_;
+	delete zmq_rep_socket_;
+	delete zmq_context_;
 	delete text_to_speech_service_;
 	delete wake_up_service_;
 	delete speech_to_intent_service_;

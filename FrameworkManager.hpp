@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include "Logging.hpp"
 
 class IWakeUpService;
 class ITextToSpeechService;
@@ -9,11 +10,15 @@ class ISpeechToIntentService;
 class ISpeechToTextService;
 class IIntent;
 
+namespace zmq {
+	class context_t;
+	class socket_t;
+}
 
 /*
 * FremworkService se encarga de manejar y coordinar los servicios basicos para que AVA funcione.
 */
-class FrameworkManager {
+class FrameworkManager : private LoggerFactory {
 public: 
 	FrameworkManager();
 	void ListenForWakeUpWord();
@@ -28,5 +33,8 @@ private:
 	IWakeUpService* const  wake_up_service_;
 	ISpeechToIntentService* const speech_to_intent_service_;
 	ISpeechToTextService* const speech_to_text_service_;
-
+	zmq::context_t* const zmq_context_;
+	zmq::socket_t* const zmq_pub_socket_;
+	zmq::socket_t* const zmq_rep_socket_;
+	
 };
