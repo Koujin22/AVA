@@ -30,7 +30,7 @@ protected:
 	std::string SsmlToString(std::string);
 private:
 	void Say(google::cloud::texttospeech::v1::SynthesisInput&, std::string, bool async);
-	void PlayAudio(std::string, bool async);
+	void PlayAudio(std::string&, bool async);
 	std::string Synthezise(
 		google::cloud::texttospeech::v1::SynthesisInput&,
 		google::cloud::texttospeech::v1::VoiceSelectionParams&,
@@ -38,5 +38,7 @@ private:
 	
 	google::cloud::texttospeech::v2_1_0::TextToSpeechClient* client_;
 	std::string voice_name_[2] = { "en-US-Wavenet-F", "es-US-Wavenet-A" };
+
+	std::string buffer;
 
 };

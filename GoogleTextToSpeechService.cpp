@@ -65,9 +65,9 @@ void GoogleTextToSpeechService::Say(texttospeech::SynthesisInput& input, string 
 	texttospeech::AudioConfig audio_config;
 	audio_config.set_audio_encoding(texttospeech::LINEAR16);
 
-	string audio = Synthezise(input, voice_config, audio_config);
+	buffer = Synthezise(input, voice_config, audio_config);
 
-	PlayAudio(audio, async);
+	PlayAudio(buffer, async);
 
 }
 
@@ -86,7 +86,9 @@ string GoogleTextToSpeechService::Synthezise(
 	return response->audio_content();
 }
 
-void GoogleTextToSpeechService::PlayAudio(string audio_content, bool async) {
+
+
+void GoogleTextToSpeechService::PlayAudio(string& audio_content, bool async) {
 	LogVerbose() << "Playing audio";
 	if (async) {
 		PlaySoundW((LPCTSTR)audio_content.c_str(), NULL, SND_MEMORY | SND_ASYNC);

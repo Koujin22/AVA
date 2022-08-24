@@ -9,6 +9,7 @@ class IMicrophoneService;
 class ISpeechToIntentService;
 class ISpeechToTextService;
 class IIntent;
+class IModuleService;
 
 namespace zmq {
 	class context_t;
@@ -21,13 +22,18 @@ namespace zmq {
 class FrameworkManager : private LoggerFactory {
 public: 
 	FrameworkManager();
+	void StartAvA();
+	~FrameworkManager();
+private:
+
 	void ListenForWakeUpWord();
 	void SayText(std::string, bool async = false, std::string = "en-us");
 	void SaySsml(std::string, bool async = false, std::string = "en-us");
 	std::string GetText(int);
 	IIntent* GetIntent();
-	~FrameworkManager();
-private:
+	
+	void BroadCastIntent(IIntent&);
+
 	FrameworkManager(std::shared_ptr<IMicrophoneService>);
 	ITextToSpeechService* const text_to_speech_service_;
 	IWakeUpService* const  wake_up_service_;
@@ -36,5 +42,6 @@ private:
 	zmq::context_t* const zmq_context_;
 	zmq::socket_t* const zmq_pub_socket_;
 	zmq::socket_t* const zmq_rep_socket_;
+	IModuleService* const module_service_;
 	
 };
