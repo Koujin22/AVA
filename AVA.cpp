@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include "ConfigurationManager.hpp"
 #include "FrameworkManager.hpp"
-#include <thread>
 
 using namespace std;
 
@@ -29,11 +28,23 @@ bool EnableVTMode()
     return true;
 }
 
+
+/*/
+
+Log Levels
+
+## LogError : Use when it is a fatal error. It must be before exit.
+## LogWarn : Use when something failed but its not enough to stop execution.
+## LogInfo : Mayor steps or changes in stage the program is taking. 
+## LogDebug : Use to dump information regarding execution. Not for static things.
+## LogVerbose : Use to detail how the LogInfo before is doing stuff. 
+
+*/
+
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
     EnableVTMode();
-    std::this_thread::sleep_for(1000ms);
 
     cout << "###############################################################################" << endl;
     cout << "||                                                                           ||" << endl;
@@ -41,12 +52,12 @@ int main()
     cout << "||                                                                           ||" << endl;
     cout << "###############################################################################" << endl;
     cout << "||  TODO List:                                                               ||" << endl;
-    cout << "||  -Poder poner sonido async.                                               ||" << endl;
-    cout << "||  -Detectar comandos enviados por modulos                                  ||" << endl;
-    cout << "||  -Limpiar codigo de modulos, mejorar loggin y limpiarlo.                  ||" << endl;
+    cout << "||  -Conseguir modulos dinamicamente.                                        ||" << endl;
+    cout << "||  -Mejorar module note taking                                              ||" << endl;
+    cout << "||                                                                           ||" << endl;
     cout << "###############################################################################" << endl;
 
-    LoggerFactory::SetLoggingLevel(DEBUG);
+    LoggerFactory::SetLoggingLevel(INFO);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();
@@ -56,6 +67,5 @@ int main()
     framework_manager->StartAvA();
     
     delete framework_manager;
-    system("pause");
     return 0;
 }

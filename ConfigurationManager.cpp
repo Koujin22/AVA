@@ -31,7 +31,7 @@ void ConfigurationManager::LoadConfigurations(string env){
 
         if (buffer.at(0) == '~') {
             setting_env = true;
-            LogDebug() << "Setting env variables";
+            LogVerbose() << "Setting env variables";
             continue;
         }
 

@@ -97,7 +97,7 @@ IIntent* PicoSpeechToIntentService::GetIntent() {
             }
             else {
                 // add code to handle unsupported commands
-                LogWarn() << "Command not supported!";
+                LogDebug() << "Couldnt understand.";
             }
 
             pv_rhino_reset(rhino_);

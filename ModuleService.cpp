@@ -4,7 +4,7 @@
 #include <strsafe.h>
 
 ModuleService::ModuleService() : LoggerFactory(this) {
-
+    LogVerbose() << "Creating and configuring Job for processess.";
     //std::thread load_modules_thread([this] {LoadModules(); });
     std::string s = "AVA_Service";
     std::wstring nameJob = std::wstring(s.begin(), s.end());
@@ -16,7 +16,7 @@ ModuleService::ModuleService() : LoggerFactory(this) {
         
     }
     if (bIsProcessInJob) {
-        LogWarn() << "Process is already in Job";
+        LogDebug() << "Process is already in Job";
     }
     hjob_ = CreateJobObject(NULL, nameJob.c_str());
 
@@ -34,20 +34,30 @@ ModuleService::ModuleService() : LoggerFactory(this) {
 
 };
 
-ModuleService::~ModuleService() {};
+ModuleService::~ModuleService() {
+    LogInfo() << "Shutting down modules...";
+    std::list<HANDLE>::iterator it;
+    for (it = hproces_.begin(); it != hproces_.end(); it++)
+    {
+        CloseHandle(*it);
+    }
+
+    CloseHandle(hjob_);
+    LogInfo() << "Modules service has been shut down.";
+};
 
 void ModuleService::LoadModules() {
 
-
+    LogDebug() << "Starting module " << "note_taker";// note_taker debe ser dinamico. 
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
-    std::string t = "C:\\Windows\\system32\\cmd.exe /k Mods\\.venv\\Scripts\\python.exe Mods/note_taker/main.py";
+    std::string t = "C:\\Windows\\system32\\cmd.exe /k Mods\\.venv\\Scripts\\python.exe -m Mods.note_taker.main";
     std::string c = "C:\\Windows\\system32\\cmd.exe";
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
-    LogInfo() << "Creating process";
+
     if (!CreateProcessA(
         const_cast<char*>(c.c_str()),   // No module name (use command line)
         const_cast<char*>(t.c_str()),        // Command line
@@ -64,6 +74,7 @@ void ModuleService::LoadModules() {
         LogError() << "CreateProcess failed (%d)." << GetLastError();
 
     }
-    LogWarn() << "Values of handles: hjob " << hjob_ << " piprocess " << pi.hProcess;
-    LogWarn() << "Asign 55 " << AssignProcessToJobObject(hjob_, pi.hProcess);
+    AssignProcessToJobObject(hjob_, pi.hProcess);
+    hproces_.push_back(pi.hProcess);
+    hproces_.push_back(pi.hThread);
 }; 

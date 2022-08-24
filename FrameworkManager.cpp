@@ -39,15 +39,18 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 { 
 
 	try {
-		LogDebug() << "Binding pub and rep sockets.";
+		LogInfo() << "Starting framework manager...";
+		LogVerbose() << "Binding pub and rep sockets.";
 		zmq_pub_socket_->bind("tcp://127.0.0.1:5500");
 		zmq_rep_socket_->bind("tcp://127.0.0.1:5501");
+		LogInfo() << "Starting modules...";
 
 		std::thread t1(&IModuleService::LoadModules, module_service_);
 		//std::thread t2(&IModuleService::LoadModules, module_service_);
 
 		std::unordered_set <string> list_of_intents;
 
+		LogInfo() << "Connecting to modules...";
 		int subs = 0;
 		std::string msg;
 		while (subs < 1) {
@@ -55,24 +58,30 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 			(void)zmq_rep_socket_->recv(msg);
 			std::string content_msg = msg.to_string();
 
-			LogDebug() << "Recieved msg: " << content_msg << ". Sending akg back. ";
+			if (content_msg.find(":") == -1 || content_msg.find("#") == -1) {
+				LogError() << "Modules must have the following pattern. <name>:syn#<intent> message recv was " << content_msg;
+				exit(1);
+			}
 
-			if (msg.to_string_view().size() <= 4 || std::string_view{ content_msg.data() + 0, 4 } != "syn_") {
-				LogError() << "Modules must have the following pattern. syn_<name_of_intent>";
+			std::string_view module_name{ content_msg.data(), content_msg.find(":") };
+			std::string_view syn_part{ content_msg.data() + content_msg.find(":")+1,   content_msg.find("#") - content_msg.find(":") -1};
+			std::string intent_name = content_msg.substr(content_msg.find("#") + 1, content_msg.size() - content_msg.find("#") );
+
+			if (list_of_intents.find(intent_name) != list_of_intents.end()) {
+				LogError() << "Found duplicate modules listening to the same intent category. Intent: " << intent_name;
+				exit(1);
+			}
+			else if (syn_part != "syn" || module_name.size() == 0 || intent_name.size() == 0) {
+				LogError() << "Modules must have the following pattern. <name>:syn#<intent> message recv was " << content_msg;
 				exit(1);
 			} 
-			std::string intent_to_listen{ content_msg.data() + 4, content_msg.size() - 4 };
-			if (list_of_intents.find(intent_to_listen) != list_of_intents.end()) {
-				LogError() << "Found duplicate modules listening to the same intent category";
-				exit(1);
-			}
-			else {
-				LogVerbose() << "Adding module that listening to intent: " << intent_to_listen;
-				list_of_intents.insert(intent_to_listen);
-			}
 
+			LogDebug() << "Recieved msg |" << content_msg << "| Module: |" << module_name << "| syn: |" << syn_part << "| intent: |" << intent_name << "|. Sending akg";
+
+			list_of_intents.insert(intent_name);
+			
 			(void)zmq_rep_socket_->send(zmq::str_buffer("akg"));
-			LogDebug() << "Sending akg";
+			
 			subs++;
 		}
 		LogInfo() << "Modules ready";
@@ -89,7 +98,7 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 
 void FrameworkManager::StartAvA() {
 	
-	SaySsml(ConstStr::welcome);
+	SaySsml(ConstStr::welcome, true);
 
 	bool turn_off = false;
 	bool understood = false;
@@ -97,45 +106,48 @@ void FrameworkManager::StartAvA() {
 
 		ListenForWakeUpWord();
 
-		SayText("What can I do for you sir?");
+		SayText("What can I do for you sir?", true);
 		understood = false;
 		while (!understood) {
 			std::unique_ptr<IIntent> intent(GetIntent());
 			
 			if (!intent) {
-				SayText("Sorry, I couldn't get that. Could you repeat again, sir?");
+				SayText("Sorry, I couldn't get that. Could you repeat again, sir?", true);
 			}
-			else if (intent->GetModule() == "AVA" && intent->GetAction() == "turnoff") {
+			else if (intent->GetModule() == "AVA" ){
 				understood = true;
-				turn_off = true;
+				if (intent->GetAction() == "turnoff") {
+					turn_off = true;
+				}
+				else {}
 			}
-			/*else if (intent->GetModule() == "TODO" && intent->GetAction() == "add") {
-				understood = true;
-				SayText("What do you want me to write down?");
-				std::string dictation = GetText(10);
-
-				SayText("Okay, is ");
-				SayText(dictation, false, "es-us");
-				SayText("correct ? ");
-
-			}*/
 			else {
 				//LogWarn() << "Intent understod yet it is not implemented yet.";
+				LogDebug() << "Broadcasting intent: " << intent->ToString();
 				BroadCastIntent(*intent);
-				LogInfo() << "Waiting on modules response";
+				LogDebug() << "Waiting on modules response";
 				zmq::message_t msg;
-				zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
+				(void)zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
+				
 				std::string_view msg_view = msg.to_string_view();
+				LogDebug() << "Got msg back. Msg: |" << msg_view << "|";
 				size_t end_command = msg_view.find("_");
 				if (end_command == -1) {
-					LogInfo() << "No action required from ava framework. Continuing";
+					LogVerbose() << "No action required from ava framework. Continuing";
 				}
 				else {
 					std::string_view command{ msg_view.data(), end_command };
-					std::string param{ msg_view.data() + end_command + 1, msg_view.size() - end_command + 1 };
+					std::string param = msg.to_string().substr(end_command+1);
 					LogDebug() << "Command is: " << command << " Param is " << param;
 					if (command == "say") {
-						SayText(param);
+
+						SayText(param, true);
+					}
+					else if (command == "say-listen") {
+
+						SayText(param, true);
+						zmq::message_t dication{ GetText(10) };
+						zmq_rep_socket_->send(dication, zmq::send_flags::none);
 					}
 				}
 
@@ -179,6 +191,7 @@ IIntent* FrameworkManager::GetIntent() {
 }
 
 FrameworkManager::~FrameworkManager() {
+	LogInfo() << "Shutting-down ava framework...";
 	delete zmq_pub_socket_;
 	delete zmq_rep_socket_;
 	delete zmq_context_;
@@ -186,5 +199,6 @@ FrameworkManager::~FrameworkManager() {
 	delete wake_up_service_;
 	delete speech_to_intent_service_;
 	delete speech_to_text_service_;
+	LogInfo() << "Shutdown complete. Bye!";
 };
 
