@@ -74,13 +74,13 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
@@ -106,7 +106,9 @@
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
 copy "$(SolutionDir)lib\porcupine\porcupine.dll" "$(TargetDir)"
-copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
+copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"
+Xcopy "$(SolutionDir)Mods\*.*" "$(TargetDir)Mods" /Y /E /I
+Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,13 +119,24 @@ copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\world\Documents\Personal\AVA\lib\rhino\include;C:\Users\world\Documents\Personal\AVA\lib\porcupine\include;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib;libpv_rhino.lib;Ws2_32.lib;Advapi32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\world\Documents\Personal\AVA\lib\rhino;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder;C:\Users\world\Documents\Personal\AVA\lib\porcupine</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
+copy "$(SolutionDir)lib\porcupine\porcupine.dll" "$(TargetDir)"
+copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"
+Xcopy "$(SolutionDir)Mods\*.*" "$(TargetDir)Mods" /Y /E /I
+Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -143,7 +156,9 @@ copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
 copy "$(SolutionDir)lib\porcupine\porcupine.dll" "$(TargetDir)"
-copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
+copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"
+Xcopy "$(SolutionDir)Mods\*.*" "$(TargetDir)Mods" /Y /E /I
+Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,13 +169,24 @@ copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\world\Documents\Personal\AVA\lib\rhino\include;C:\Users\world\Documents\Personal\AVA\lib\porcupine\include;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib;libpv_rhino.lib;Ws2_32.lib;Advapi32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\world\Documents\Personal\AVA\lib\rhino;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder;C:\Users\world\Documents\Personal\AVA\lib\porcupine</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
+copy "$(SolutionDir)lib\porcupine\porcupine.dll" "$(TargetDir)"
+copy "$(SolutionDir)lib\rhino\libpv_rhino.dll" "$(TargetDir)"
+Xcopy "$(SolutionDir)Mods\*.*" "$(TargetDir)Mods" /Y /E /I
+Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp" />

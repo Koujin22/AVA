@@ -8,6 +8,7 @@ public:
 	std::string GetAction();
 	std::map<std::string, std::string> GetParameters();
 	std::string GetParameter(std::string);
+	std::string ToString();
 	int GetParametersSizer();
 	~PicoIntent() {};
 };

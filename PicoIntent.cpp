@@ -20,3 +20,7 @@ string PicoIntent::GetParameter(string key) { return parameters_.at(key); }
 std::map<string, string> PicoIntent::GetParameters() { return parameters_; }
 int PicoIntent::GetParametersSizer() { return num_parameters_; }
 
+
+string PicoIntent::ToString() {
+	return module_ + " " + action_;
+}
