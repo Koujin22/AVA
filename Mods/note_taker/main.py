@@ -5,8 +5,9 @@ class Note_taker(AvaModule):
         super().__init__("note_taker", "TODO")
 
 if __name__ == "__main__":
+    print("Hola")
     note:Note_taker = Note_taker()
 
-    note.waitForIntent()
+    #note.waitForIntent()
     note.say("Hola mucho gusto")
 
