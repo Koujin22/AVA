@@ -1,40 +1,12 @@
-import time
-import zmq
-
-
-def main():
-    context = zmq.Context()
-
-    # First, connect our subscriber socket
-    subscriber = context.socket(zmq.SUB)
-    subscriber.connect("tcp://127.0.0.1:5500")
-    subscriber.setsockopt(zmq.SUBSCRIBE, b'TODO')
-
-    time.sleep(1)
-
-    # Second, synchronize with publisher
-    syncclient = context.socket(zmq.REQ)
-    syncclient.connect("tcp://127.0.0.1:5501")
-
-    # send a synchronization request
-    print("Sending syn")
-    syncclient.send(b'syn_TODO')
-
-    # wait for synchronization reply
-    msg = syncclient.recv()
-    print("Recieved: ", msg)
-
-    # Third, get our updates and report how many we got
+from ..ava_module.AvaModule import AvaModule
+class Note_taker(AvaModule):
     
-    msg = subscriber.recv()
-    print("Recieved MSG from sub: ", msg)
-
-    syncclient.send(b'say_What do you want me to write down?')
-
-
-
-def Printstuff():
-    print("Aqui ando todo tranqui.")
+    def __init__(self):
+        super().__init__("note_taker", "TODO")
 
 if __name__ == "__main__":
-    main()
+    note:Note_taker = Note_taker()
+
+    note.waitForIntent()
+    note.say("Hola mucho gusto")
+
