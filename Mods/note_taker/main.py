@@ -29,6 +29,8 @@ def main():
     msg = subscriber.recv()
     print("Recieved MSG from sub: ", msg)
 
+    syncclient.send(b'say_What do you want me to write down?')
+
 
 
 def Printstuff():

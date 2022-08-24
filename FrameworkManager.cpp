@@ -50,7 +50,7 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 
 		int subs = 0;
 		std::string msg;
-		while (subs < 2) {
+		while (subs < 1) {
 			zmq::message_t msg;
 			(void)zmq_rep_socket_->recv(msg);
 			std::string content_msg = msg.to_string();
@@ -132,7 +132,11 @@ void FrameworkManager::StartAvA() {
 				}
 				else {
 					std::string_view command{ msg_view.data(), end_command };
-					LogDebug() << "Command is: " << command;
+					std::string param{ msg_view.data() + end_command + 1, msg_view.size() - end_command + 1 };
+					LogDebug() << "Command is: " << command << " Param is " << param;
+					if (command == "say") {
+						SayText(param);
+					}
 				}
 
 				
