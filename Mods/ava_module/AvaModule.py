@@ -1,62 +1,96 @@
 from ctypes import FormatError
 import string
-import time
-import zmq
 import logging
-from abc import ABC, abstractmethod
+from threading import Timer
+from .AvaConnection import AvaConnection
 
 
-class BadHandShake(Exception):
+class BadSocketState(Exception):
     pass
 
-class AvaModule(ABC):
-    context: zmq.Context
-    req_socket: zmq.Socket
-    sub_socket: zmq.Socket
+
+class AvaModule():
+
+    connection: AvaConnection
 
     module_name: string
     intent_name: string
 
+    ava_log: logging.Logger
     log: logging.Logger
 
-    def __init__ (self, module_name: string, intent_name: string ):
+    __can_send_req: bool = False
+    __can_listen_req: bool = False
+
+    def __init__(self, module_name: string, intent_name: string, log_level: int = logging.INFO):
         #logging.basicConfig(level=logging.DEBUG, format='%(relativeCreated)6d %(threadName)s %(message)s')
         ch = logging.StreamHandler()
-        formatter = logging.Formatter('|%(levelname)s| %(name)s | %(message)s')
+        formatter = logging.Formatter(
+            '|%(levelname)7s| %(name)22s | %(message)s')
         ch.setFormatter(formatter)
-        self.log = logging.getLogger(module_name.rjust(22))
+        self.ava_log = logging.getLogger("AvaModule")
+        self.ava_log.setLevel(log_level)
+        self.ava_log.addHandler(ch)
+
+        ch = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '|%(levelname)7s| %(name)22s | %(message)s')
+        ch.setFormatter(formatter)
+        self.log = logging.getLogger(module_name)
         self.log.setLevel(logging.INFO)
         self.log.addHandler(ch)
-        self.log.info("Example")
-        self.log.warn("Warn exmp")
-        self.context = zmq.Context()
-        
-        self.sub_socket = self.context.socket(zmq.SUB)
-        self.sub_socket.connect("tcp://127.0.0.1:5500")
-        self.sub_socket.setsockopt(zmq.SUBSCRIBE, bytes(intent_name, 'ascii'))
-        
-        time.sleep(1)
-        
-        self.req_socket = self.context.socket(zmq.REQ)
-        self.req_socket.connect("tcp://127.0.0.1:5501")
 
-        #self.req_socket.send(bytes(module_name+":syn#"+intent_name, "ascii"))
+        self.ava_log.info("Creating zmq context and sockets")
+        self.connection = AvaConnection(module_name, intent_name)
+        self.ava_log.info("Sync completed")
 
-        
-        #msg = self.req_socket.recv()
+    def __send_req(self, msg: bytes) -> None:
+        if (self.__can_send_req):
 
-        #if msg != b'akg':
-        #   raise BadHandShake("Didnt recv akg")
+            self.__can_send_req = False
+            self.__can_listen_req = True
+
+            t = Timer(60.0, self._can_listen_timeout)
+            self.connection.send_req(msg)
+        else:
+            raise BadSocketState("Unable to send req before getting intent.")
+
+    def __listen_req(self) -> bytes:
+        if (self.__can_listen_req):
+            self.__can_listen_req = False
+            return self.connection.recv_req()
+        else:
+            raise BadSocketState("Unable to listen req before sending.")
 
     def waitForIntent(self) -> string:
-        msg = self.sub_socket.recv()
+        self.ava_log.info(
+            "Waiting for intent. Intent to listen is: %s", self.intent_name)
+        msg = self.connection.recv_sub()
+        self.__can_send_req = True
+        t = Timer(60.0, self._can_send_timeout)
+        self.ava_log.info("Intent recieved. Intent: %s", msg)
         return msg.decode()
 
-    def say(self, msg:string) -> None:
-        self.req_socket.send(bytes("say_"+msg, 'ascii'))
+    def say(self, msg: string) -> None:
+        self.ava_log.info("Sending to ava: say_%s", msg)
+        self.__send_req(bytes("say_"+msg, 'ascii'))
 
     def sayAndListen(self, msg: string) -> string:
-        msg = self.req_socket.send(bytes("say-listen_"+msg, 'ascii'))
-        return msg.decode()
-    
+        self.ava_log.info("Sending to ava: listen_%s", msg)
+        self.__send_req(bytes("say-listen_"+msg, 'ascii'))
+        response: bytes = self.__listen_req()
 
+        self.ava_log.info("Recieved from ava: %s", response)
+        return response.decode()
+
+    def _can_send_timeout(self):
+        if (self.__can_send_req):
+            self.ava_log.warn(
+                "Timeout on send. Toggling send to off. Modules still need to send empty msgs to AvA")
+        self.__can_send_req = False
+
+    def _can_listen_timeout(self):
+        if (self.__can_listen_req):
+            self.ava_log.warn(
+                "Timeout on listen req socket. Toggling listen to off. Modules still need to listen for empty msgs from AvA")
+        self.__can_listen_req = False

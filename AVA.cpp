@@ -53,8 +53,9 @@ int main()
     cout << "###############################################################################" << endl;
     cout << "||  TODO List:                                                               ||" << endl;
     cout << "||  -Conseguir modulos dinamicamente.                                        ||" << endl;
-    cout << "||  -Mejorar module note taking                                              ||" << endl;
-    cout << "||                                                                           ||" << endl;
+    cout << "||  -Timeout en los sockets (cpp)                                            ||" << endl;
+    cout << "||  -Timeout en los sockets (py)                                             ||" << endl;
+    cout << "||  -Impedir mandar si no se ha recivido intent (py)                         ||" << endl;
     cout << "###############################################################################" << endl;
 
     LoggerFactory::SetLoggingLevel(INFO);
