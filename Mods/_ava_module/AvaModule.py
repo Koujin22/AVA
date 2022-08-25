@@ -1,20 +1,22 @@
 from ctypes import FormatError
-import string
 import logging
 from threading import Timer
+from typing import Tuple
 from .AvaConnection import AvaConnection
 
 
 class BadSocketState(Exception):
     pass
 
+class TerminateModule(Exception):
+    pass
 
 class AvaModule():
 
     connection: AvaConnection
 
-    module_name: string
-    intent_name: string
+    module_name: str
+    intent_name: str
 
     ava_log: logging.Logger
     log: logging.Logger
@@ -22,8 +24,11 @@ class AvaModule():
     __can_send_req: bool = False
     __can_listen_req: bool = False
 
-    def __init__(self, module_name: string, intent_name: string, log_level: int = logging.INFO):
-        #logging.basicConfig(level=logging.DEBUG, format='%(relativeCreated)6d %(threadName)s %(message)s')
+    def __init__(self, module_name: str, intent_name: str, log_level: int = logging.INFO):
+        
+        self.intent_name = intent_name
+        self.module_name = module_name
+        
         ch = logging.StreamHandler()
         formatter = logging.Formatter(
             '|%(levelname)7s| %(name)22s | %(message)s')
@@ -50,7 +55,8 @@ class AvaModule():
             self.__can_send_req = False
             self.__can_listen_req = True
 
-            t = Timer(60.0, self._can_listen_timeout)
+            t = Timer(5.0, self._can_listen_timeout)
+            t.start()
             self.connection.send_req(msg)
         else:
             raise BadSocketState("Unable to send req before getting intent.")
@@ -61,21 +67,32 @@ class AvaModule():
             return self.connection.recv_req()
         else:
             raise BadSocketState("Unable to listen req before sending.")
+    
+    def getResopnse(self) -> str:
+        if(self.__can_listen_req):
+            return self.__listen_req().decode()
+        else:
+            raise BadSocketState("Unable to listen req before sending.")
 
-    def waitForIntent(self) -> string:
+    def waitForIntent(self) -> Tuple[str, str]:
         self.ava_log.info(
             "Waiting for intent. Intent to listen is: %s", self.intent_name)
         msg = self.connection.recv_sub()
+        if(msg == b'MODULES_stop'):
+            raise TerminateModule("Ava called to stop")
         self.__can_send_req = True
-        t = Timer(60.0, self._can_send_timeout)
+        t = Timer(5.0, self._can_send_timeout)
+        t.start()
         self.ava_log.info("Intent recieved. Intent: %s", msg)
-        return msg.decode()
+        return msg.decode().split(" ", 1)
 
-    def say(self, msg: string) -> None:
+    def say(self, msg: str, autoListen: bool = True) -> None:
         self.ava_log.info("Sending to ava: say_%s", msg)
         self.__send_req(bytes("say_"+msg, 'ascii'))
+        if(autoListen):
+            self.__listen_req()
 
-    def sayAndListen(self, msg: string) -> string:
+    def sayAndListen(self, msg: str) -> str:
         self.ava_log.info("Sending to ava: listen_%s", msg)
         self.__send_req(bytes("say-listen_"+msg, 'ascii'))
         response: bytes = self.__listen_req()
@@ -86,11 +103,16 @@ class AvaModule():
     def _can_send_timeout(self):
         if (self.__can_send_req):
             self.ava_log.warn(
-                "Timeout on send. Toggling send to off. Modules still need to send empty msgs to AvA")
+                "Timeout on send. Toggling send to off.")
         self.__can_send_req = False
 
     def _can_listen_timeout(self):
         if (self.__can_listen_req):
             self.ava_log.warn(
-                "Timeout on listen req socket. Toggling listen to off. Modules still need to listen for empty msgs from AvA")
+                "Timeout on listen req socket. Toggling listen to off.")
+            msg = self.connection.recv_req(2)
+            self.ava_log.debug("Msg: %s", msg)
         self.__can_listen_req = False
+    
+
+        

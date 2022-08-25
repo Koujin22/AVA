@@ -113,6 +113,9 @@
     <ClInclude Include="ModuleService.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="WindowsUtil.hpp">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\dev.properties">

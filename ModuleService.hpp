@@ -8,8 +8,13 @@ class ModuleService : public IModuleService, private LoggerFactory {
 public:
 	ModuleService();
 	~ModuleService();
+
+	int CountModules();
+
 	void LoadModules();
 private:
+	void StartModule(std::string);
+
 	HANDLE hjob_;
-	std::list<HANDLE> hproces_;
+	std::list<PROCESS_INFORMATION> hproces_;
 };

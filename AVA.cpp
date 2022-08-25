@@ -52,13 +52,12 @@ int main()
     cout << "||                                                                           ||" << endl;
     cout << "###############################################################################" << endl;
     cout << "||  TODO List:                                                               ||" << endl;
-    cout << "||  -Conseguir modulos dinamicamente.                                        ||" << endl;
-    cout << "||  -Timeout en los sockets (cpp)                                            ||" << endl;
-    cout << "||  -Timeout en los sockets (py)                                             ||" << endl;
-    cout << "||  -Impedir mandar si no se ha recivido intent (py)                         ||" << endl;
+    cout << "||  -Mandar slots a modulos                                                  ||" << endl;
+    cout << "||  -Hacer que el modulo note_taker haga su funcion                          ||" << endl;
+    cout << "||  -Corra ava sin ventana y al inciar compu                                 ||" << endl;
     cout << "###############################################################################" << endl;
 
-    LoggerFactory::SetLoggingLevel(INFO);
+    LoggerFactory::SetLoggingLevel(DEBUG);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();

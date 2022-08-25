@@ -101,7 +101,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\world\Documents\Personal\AVA\lib\rhino;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder;C:\Users\world\Documents\Personal\AVA\lib\porcupine</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib;libpv_rhino.lib;Ws2_32.lib;Advapi32.lib;Winmm.lib</AdditionalDependencies>
+      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib;libpv_rhino.lib;Ws2_32.lib;Advapi32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
@@ -151,7 +151,7 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\world\Documents\Personal\AVA\lib\rhino;C:\Users\world\Documents\Personal\AVA\lib\pvrecorder;C:\Users\world\Documents\Personal\AVA\lib\porcupine</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib;libpv_rhino.lib;Ws2_32.lib;Advapi32.lib;Winmm.lib</AdditionalDependencies>
+      <AdditionalDependencies>libpv_porcupine.lib;libpv_recorder.lib;libpv_rhino.lib;Ws2_32.lib;Advapi32.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)lib\pvrecorder\libpv_recorder.dll" "$(TargetDir)"
@@ -218,6 +218,7 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     <ClInclude Include="PicoRecorderService.hpp" />
     <ClInclude Include="PicoSpeechToIntentService.hpp" />
     <ClInclude Include="PicoWakeUpService.hpp" />
+    <ClInclude Include="WindowsUtil.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\porcupine\libpv_porcupine.dll" />

@@ -13,12 +13,13 @@ class AvaConnection():
     req_socket: zmq.Socket
     sub_socket: zmq.Socket
 
-    def __init__(self, module_name: string, intent_name: string):
+    def __init__(self, module_name: str, intent_name: str):
         self.context = zmq.Context()
 
         self.sub_socket = self.context.socket(zmq.SUB)
         self.sub_socket.connect("tcp://127.0.0.1:5500")
         self.sub_socket.setsockopt(zmq.SUBSCRIBE, bytes(intent_name, 'ascii'))
+        self.sub_socket.setsockopt(zmq.SUBSCRIBE, b'MODULES')
 
         time.sleep(1)
 
@@ -38,5 +39,5 @@ class AvaConnection():
     def send_req(self, msg: bytes) -> None:
         self.req_socket.send(msg)
 
-    def recv_req(self) -> bytes:
-        return self.req_socket.recv()
+    def recv_req(self, flag: int = 0) -> bytes:
+        return self.req_socket.recv(flag)

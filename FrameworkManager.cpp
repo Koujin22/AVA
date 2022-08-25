@@ -43,19 +43,25 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 		LogVerbose() << "Binding pub and rep sockets.";
 		zmq_pub_socket_->bind("tcp://127.0.0.1:5500");
 		zmq_rep_socket_->bind("tcp://127.0.0.1:5501");
+		zmq_rep_socket_->set(zmq::sockopt::rcvtimeo, 5000);
 		LogInfo() << "Starting modules...";
 
+
+		int subs = module_service_->CountModules();
+
 		std::thread t1(&IModuleService::LoadModules, module_service_);
-		//std::thread t2(&IModuleService::LoadModules, module_service_);
 
 		std::unordered_set <string> list_of_intents;
 
 		LogInfo() << "Connecting to modules...";
-		int subs = 0;
 		std::string msg;
-		while (subs < 1) {
+		while (subs > 0) {
 			zmq::message_t msg;
-			(void)zmq_rep_socket_->recv(msg);
+			zmq::recv_result_t result = zmq_rep_socket_->recv(msg);
+			if (msg.empty()) {
+				LogError() << "Module connection timeout!";
+				exit(1);
+			}
 			std::string content_msg = msg.to_string();
 
 			if (content_msg.find(":") == -1 || content_msg.find("#") == -1) {
@@ -76,18 +82,17 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 				exit(1);
 			} 
 
-			LogDebug() << "Recieved msg |" << content_msg << "| Module: |" << module_name << "| syn: |" << syn_part << "| intent: |" << intent_name << "|. Sending akg";
+			LogDebug() << "Module: |" << module_name << "| syn: |" << syn_part << "| intent: |" << intent_name << "|. Sending akg";
 
 			list_of_intents.insert(intent_name);
 			
 			(void)zmq_rep_socket_->send(zmq::str_buffer("akg"));
 			
-			subs++;
+			subs--;
 		}
 		LogInfo() << "Modules ready";
 		
 		t1.join();
-		//t2.join();
 	}
 	catch(zmq::error_t &t) {
 		LogError() << t.what();
@@ -128,30 +133,35 @@ void FrameworkManager::StartAvA() {
 				LogDebug() << "Waiting on modules response";
 				zmq::message_t msg;
 				(void)zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
-				
-				std::string_view msg_view = msg.to_string_view();
-				LogDebug() << "Got msg back. Msg: |" << msg_view << "|";
-				size_t end_command = msg_view.find("_");
-				if (end_command == -1) {
-					LogVerbose() << "No action required from ava framework. Continuing";
+				if (msg.empty()) {
+					LogWarn() << "Got not response from module.";
 				}
 				else {
-					std::string_view command{ msg_view.data(), end_command };
-					std::string param = msg.to_string().substr(end_command+1);
-					LogDebug() << "Command is: " << command << " Param is " << param;
-					if (command == "say") {
 
-						SayText(param, true);
+					std::string_view msg_view = msg.to_string_view();
+					LogDebug() << "Got msg back. Msg: |" << msg_view << "|";
+					size_t end_command = msg_view.find("_");
+					if (end_command == -1) {
+						LogVerbose() << "No action required from ava framework. Continuing";
 					}
-					else if (command == "say-listen") {
+					else {
+						std::string_view command{ msg_view.data(), end_command };
+						std::string param = msg.to_string().substr(end_command + 1);
+						LogDebug() << "Command is: " << command << " Param is " << param;
+						if (command == "say") {
 
-						SayText(param, true);
-						zmq::message_t dication{ GetText(10) };
-						zmq_rep_socket_->send(dication, zmq::send_flags::none);
+							SayText(param, true);
+							zmq::message_t empty_msg{ std::string{"Done"}};
+							zmq_rep_socket_->send(empty_msg, zmq::send_flags::none);
+						}
+						else if (command == "say-listen") {
+
+							SayText(param, true);
+							zmq::message_t dication{ GetText(10) };
+							zmq_rep_socket_->send(dication, zmq::send_flags::none);
+						}
 					}
-				}
-
-				
+				}				
 				
 				understood = true;
 			}
@@ -192,6 +202,9 @@ IIntent* FrameworkManager::GetIntent() {
 
 FrameworkManager::~FrameworkManager() {
 	LogInfo() << "Shutting-down ava framework...";
+	zmq::message_t stop{ std::string{"MODULES_stop"} };
+	zmq_pub_socket_->send(stop, zmq::send_flags::none);
+	delete module_service_;
 	delete zmq_pub_socket_;
 	delete zmq_rep_socket_;
 	delete zmq_context_;
