@@ -22,5 +22,17 @@ int PicoIntent::GetParametersSizer() { return num_parameters_; }
 
 
 string PicoIntent::ToString() {
-	return module_ + " " + action_;
+	if (parameters_.size() > 0) {
+		std::string slots = "";
+		for (const auto& [k, v] : parameters_) {
+			slots.append(k);
+			slots.append(":");
+			slots.append(v);
+			slots.append(",");
+		}
+		return module_ + " " + action_ + " " + slots;
+	}
+	else {
+		return module_ + " " + action_ + " ";
+	}
 }

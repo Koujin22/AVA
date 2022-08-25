@@ -146,17 +146,32 @@ void FrameworkManager::StartAvA() {
 					}
 					else {
 						std::string_view command{ msg_view.data(), end_command };
-						std::string param = msg.to_string().substr(end_command + 1);
-						LogDebug() << "Command is: " << command << " Param is " << param;
-						if (command == "say") {
+						std::string param = msg.to_string().substr(end_command + 1,  msg.to_string().find("#") - end_command-1);
+						std::string vars = msg.to_string().substr(msg.to_string().find("#")+1);
 
-							SayText(param, true);
+						LogDebug() << "Command is: " << command << " Param is " << param<< " vars: " << vars;
+						if (command == "say") {
+							
+							if (vars.find('A') == -1 || vars.find('L') == -1) {
+								LogError() << "Say command missing vars.";
+								exit(1);
+							}
+							bool async = vars.at(vars.find('A') + 1) == 't';
+							std::string lang = vars.substr(vars.find('L') + 1);
+
+							SayText(param, async, lang);
 							zmq::message_t empty_msg{ std::string{"Done"}};
 							zmq_rep_socket_->send(empty_msg, zmq::send_flags::none);
 						}
 						else if (command == "say-listen") {
+							if (vars.find('A') == -1 || vars.find('L') == -1) {
+								LogError() << "Say command missing vars.";
+								exit(1);
+							}
+							bool async = vars.at(vars.find('A') + 1) == 't';
+							std::string lang = vars.substr(vars.find('L'));
 
-							SayText(param, true);
+							SayText(param, async, lang);
 							zmq::message_t dication{ GetText(10) };
 							zmq_rep_socket_->send(dication, zmq::send_flags::none);
 						}
