@@ -7,6 +7,7 @@
 #include "PicoRecorderService.hpp"
 #include "ModuleService.hpp"
 #include "IIntent.hpp"
+#include "ModuleCommand.hpp"
 #include <zmq.hpp>
 #include <thread>
 #include <unordered_set>
@@ -106,85 +107,65 @@ void FrameworkManager::StartAvA() {
 	SaySsml(ConstStr::welcome, true);
 
 	bool turn_off = false;
-	bool understood = false;
 	while (!turn_off) {
 
 		ListenForWakeUpWord();
 
 		SayText("What can I do for you sir?", true);
-		understood = false;
-		while (!understood) {
-			std::unique_ptr<IIntent> intent(GetIntent());
-			
-			if (!intent) {
-				SayText("Sorry, I couldn't get that. Could you repeat again, sir?", true);
-			}
-			else if (intent->GetModule() == "AVA" ){
-				understood = true;
-				if (intent->GetAction() == "turnoff") {
-					turn_off = true;
-				}
-				else {}
-			}
-			else {
-				//LogWarn() << "Intent understod yet it is not implemented yet.";
-				LogDebug() << "Broadcasting intent: " << intent->ToString();
-				BroadCastIntent(*intent);
-				LogDebug() << "Waiting on modules response";
-				zmq::message_t msg;
-				(void)zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
-				if (msg.empty()) {
-					LogWarn() << "Got not response from module.";
-				}
-				else {
-
-					std::string_view msg_view = msg.to_string_view();
-					LogDebug() << "Got msg back. Msg: |" << msg_view << "|";
-					size_t end_command = msg_view.find("_");
-					if (end_command == -1) {
-						LogVerbose() << "No action required from ava framework. Continuing";
-					}
-					else {
-						std::string_view command{ msg_view.data(), end_command };
-						std::string param = msg.to_string().substr(end_command + 1,  msg.to_string().find("#") - end_command-1);
-						std::string vars = msg.to_string().substr(msg.to_string().find("#")+1);
-
-						LogDebug() << "Command is: " << command << " Param is " << param<< " vars: " << vars;
-						if (command == "say") {
-							
-							if (vars.find('A') == -1 || vars.find('L') == -1) {
-								LogError() << "Say command missing vars.";
-								exit(1);
-							}
-							bool async = vars.at(vars.find('A') + 1) == 't';
-							std::string lang = vars.substr(vars.find('L') + 1);
-
-							SayText(param, async, lang);
-							zmq::message_t empty_msg{ std::string{"Done"}};
-							zmq_rep_socket_->send(empty_msg, zmq::send_flags::none);
-						}
-						else if (command == "say-listen") {
-							if (vars.find('A') == -1 || vars.find('L') == -1) {
-								LogError() << "Say command missing vars.";
-								exit(1);
-							}
-							bool async = vars.at(vars.find('A') + 1) == 't';
-							std::string lang = vars.substr(vars.find('L'));
-
-							SayText(param, async, lang);
-							zmq::message_t dication{ GetText(10) };
-							zmq_rep_socket_->send(dication, zmq::send_flags::none);
-						}
-					}
-				}				
-				
-				understood = true;
-			}
-			intent.reset();
-		}
+		ProcessIntent();
+		
 	}
 	SayText("Goodbye sir");
 
+}
+
+void FrameworkManager::ProcessIntent() {
+	std::unique_ptr<IIntent> intent(GetIntent());
+	LogDebug() << "Broadcasting intent: " << intent->ToString();
+	BroadCastIntent(*intent);
+	bool is_done = false;
+	while (!is_done) {
+		LogDebug() << "Waiting on modules response";
+		zmq::message_t msg;
+		(void)zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
+
+		if (msg.empty()) {
+			LogWarn() << "Got not response from module.";
+			is_done = true;
+		}
+		else {
+			is_done = ProcessModuleMsg(msg);
+		}
+		
+	}
+	intent.reset();
+}
+
+bool FrameworkManager::ProcessModuleMsg(zmq::message_t& msg) {
+	std::string_view msg_view = msg.to_string_view();
+	LogDebug() << "Got msg back. Msg: |" << msg_view << "|";
+	if (msg_view == "done") {
+		LogVerbose() << "No action required from ava framework. Continuing";
+		return true;
+	}
+	else {
+		ModuleCommand mod_command(msg_view);
+
+		LogDebug() << mod_command.ToString();
+		if (mod_command.GetCommand() == "say") {
+
+			SayText(mod_command.GetParam(), mod_command.IsAsync(), mod_command.GetLang());
+			zmq::message_t empty_msg{ std::string{"Done"} };
+			zmq_rep_socket_->send(empty_msg, zmq::send_flags::none);
+		}
+		else if (mod_command.GetCommand() == "say-listen") {
+
+			SayText(mod_command.GetParam(), mod_command.IsAsync(), mod_command.GetLang());
+			zmq::message_t dication{ GetText(10) };
+			zmq_rep_socket_->send(dication, zmq::send_flags::none);
+		}
+		return false;
+	}
 }
 
 void FrameworkManager::BroadCastIntent(IIntent& intent) {
@@ -212,7 +193,14 @@ void FrameworkManager::SaySsml(string msg, bool async, string language) {
 }
 
 IIntent* FrameworkManager::GetIntent() {
-	return speech_to_intent_service_->GetIntent();
+	IIntent* intent;
+	while (!intent) {
+		intent = speech_to_intent_service_->GetIntent();
+		if (!intent) {
+			SayText("Sorry, I couldn't get that. Could you repeat again, sir?", true);
+		}
+	}
+	return intent;
 }
 
 FrameworkManager::~FrameworkManager() {

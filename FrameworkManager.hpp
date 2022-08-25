@@ -14,6 +14,7 @@ class IModuleService;
 namespace zmq {
 	class context_t;
 	class socket_t;
+	class message_t;
 }
 
 /*
@@ -27,6 +28,8 @@ public:
 private:
 
 	void ListenForWakeUpWord();
+	void ProcessIntent();
+	bool ProcessModuleMsg(zmq::message_t&);
 	void SayText(std::string, bool async = false, std::string = "en-us");
 	void SaySsml(std::string, bool async = false, std::string = "en-us");
 	std::string GetText(int);

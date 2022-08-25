@@ -49,48 +49,6 @@ class AvaModule(Module):
             return self.connection.recv_req()
         else:
             raise BadSocketState("Unable to listen req before sending.")
-    
-    def getResopnse(self) -> str:
-        if(self.__can_listen_req):
-            return self.__listen_req().decode()
-        else:
-            raise BadSocketState("Unable to listen req before sending.")
-
-    def waitForIntent(self) -> Tuple[str, str]:
-        self.log.info(
-            "Waiting for intent. Intent to listen is: %s", self.intent_name)
-        msg = self.connection.recv_sub()
-        if(msg == b'MODULES_stop'):
-            raise TerminateModule("Ava called to stop")
-        self.__can_send_req = True
-        t = Timer(5.0, self._can_send_timeout)
-        t.start()
-        self.log.info("Intent recieved. Intent: %s", msg)
-        module, action, slotsstr = msg.decode().split(" ", 2)
-
-        slots = {}
-        for slot in slotsstr.split(","):
-            if (len(slot) == 0):
-                continue
-            else:
-                key, val = slot.split(":")
-                slots[key] =val
-            
-        return module, action, slots
-
-    def say(self, msg: str, lang: str = "en-us", asy: bool = False, autoListen: bool = True) -> None:
-        self.log.info("Sending to ava: say_%s", msg)
-        self.__send_req(bytes("say_"+msg+"#A"+('t' if asy else 'f')+"L"+lang, 'ascii'))
-        if(autoListen):
-            self.__listen_req()
-
-    def sayAndListen(self, msg: str, lang: str = "en-us", asy: bool = False) -> str:
-        self.log.info("Sending to ava: listen_%s", msg)
-        self.__send_req(bytes("say-listen_"+msg+"#A"+('t' if asy else 'f')+"L"+lang, 'ascii'))
-        response: bytes = self.__listen_req()
-
-        self.log.info("Recieved from ava: %s", response)
-        return response.decode()
 
     def _can_send_timeout(self):
         if (self.__can_send_req):
@@ -105,6 +63,48 @@ class AvaModule(Module):
             msg = self.connection.recv_req(2)
             self.log.debug("Msg: %s", msg)
         self.__can_listen_req = False
-    
 
-        
+    def waitForIntent(self) -> Tuple[str, str]:
+        self.log.info(
+            "Waiting for intent. Intent to listen is: %s", self.intent_name)
+        msg = self.connection.recv_sub()
+        if(msg == b'MODULES_stop'):
+            raise TerminateModule("Ava called to stop")
+        self.__can_send_req = True
+        t = Timer(5.0, self._can_send_timeout)
+        t.start()
+
+        self.log.info("Intent recieved. Intent: %s", msg)
+        module, action, slotsstr = msg.decode().split(" ", 2)
+
+        slots = {}
+        for slot in slotsstr.split(","):
+            if (len(slot) == 0):
+                continue
+            else:
+                key, val = slot.split(":")
+                slots[key] =val
+
+        return module, action, slots
+
+    def getResopnse(self) -> str:
+        if(self.__can_listen_req):
+            return self.__listen_req().decode()
+        else:
+            raise BadSocketState("Unable to listen req before sending.")
+
+    def say(self, msg: str, lang: str = "en-us", asy: bool = False, autoListen: bool = True) -> None:
+        self.log.info("Sending to ava: say_%s", msg)
+        self.__send_req(bytes("say_"+msg+"#A"+('t' if asy else 'f')+"L"+lang, 'ascii'))
+        if(autoListen):
+            self.__listen_req()
+            self.__can_send_req = True
+
+    def sayAndListen(self, msg: str, lang: str = "en-us", asy: bool = False) -> str:
+        self.log.info("Sending to ava: listen_%s", msg)
+        self.__send_req(bytes("say-listen_"+msg+"#A"+('t' if asy else 'f')+"L"+lang, 'ascii'))
+        response: bytes = self.__listen_req()
+
+        self.log.info("Recieved from ava: %s", response)
+        return response.decode()
+
