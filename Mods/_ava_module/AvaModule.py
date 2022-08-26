@@ -1,4 +1,5 @@
 from ctypes import FormatError
+from enum import Enum
 from threading import Timer
 import logging
 from typing import Tuple
@@ -12,6 +13,11 @@ class BadSocketState(Exception):
 class TerminateModule(Exception):
     pass
 
+class SocketState(Enum):
+    WAITING_INTENT = 0
+    READY_TO_SEND = 0
+    READY_TO_LISTEN = 0
+
 class AvaModule(Module):
 
     connection: AvaConnection
@@ -19,8 +25,8 @@ class AvaModule(Module):
     module_name: str
     intent_name: str
 
-    __can_send_req: bool = False
-    __can_listen_req: bool = False
+    socket_state: SocketState = SocketState.WAITING_INTENT
+    timeout: Timer
 
     def __init__(self, module_name: str, intent_name: str, log_level: int = logging.INFO):
         super().__init__("AvaModule", log_level)
@@ -32,23 +38,32 @@ class AvaModule(Module):
         self.log.info("Sync completed")
 
     def __send_req(self, msg: bytes) -> None:
-        if (self.__can_send_req):
-
-            self.__can_send_req = False
-            self.__can_listen_req = True
-
-            t = Timer(5.0, self._can_listen_timeout)
-            t.start()
+        if (self.socket_state == SocketState.READY_TO_SEND):
             self.connection.send_req(msg)
+            self.socket_state = SocketState.READY_TO_LISTEN
         else:
             raise BadSocketState("Unable to send req before getting intent.")
 
     def __listen_req(self) -> bytes:
-        if (self.__can_listen_req):
-            self.__can_listen_req = False
-            return self.connection.recv_req()
+        if (self.socket_state == SocketState.READY_TO_LISTEN):
+            msg = self.connection.recv_req()
+            if(msg == b'done'):
+                self.socket_state = SocketState.WAITING_INTENT
+            else:
+                self.socket_state = SocketState.READY_TO_SEND
         else:
             raise BadSocketState("Unable to listen req before sending.")
+
+    def __listen_sub(self) -> bytes:
+        if(self.socket_state == SocketState.WAITING_INTENT):
+            msg =  self.connection.recv_sub()
+            if(msg == b'MODULES_stop'):
+                raise TerminateModule("Ava called to stop")
+            else:
+                self.socket_state = SocketState.READY_TO_SEND
+                return msg
+        else:
+            raise BadSocketState("Unable to listen sub before ending conversation")
 
     def _can_send_timeout(self):
         if (self.__can_send_req):
@@ -65,14 +80,13 @@ class AvaModule(Module):
         self.__can_listen_req = False
 
     def waitForIntent(self) -> Tuple[str, str]:
-        self.log.info(
-            "Waiting for intent. Intent to listen is: %s", self.intent_name)
+        self.log.info("Waiting for intent. Intent to listen is: %s", self.intent_name)
         msg = self.connection.recv_sub()
-        if(msg == b'MODULES_stop'):
-            raise TerminateModule("Ava called to stop")
-        self.__can_send_req = True
-        t = Timer(5.0, self._can_send_timeout)
-        t.start()
+
+        self.socket_state = SocketState.READY_TO_SEND
+
+        # t = Timer(5.0, self._can_send_timeout)
+        # t.start()
 
         self.log.info("Intent recieved. Intent: %s", msg)
         module, action, slotsstr = msg.decode().split(" ", 2)
