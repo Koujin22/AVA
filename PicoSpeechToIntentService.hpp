@@ -9,10 +9,14 @@ class PicoSpeechToIntentService : public ISpeechToIntentService, private LoggerF
 public:
 	PicoSpeechToIntentService(std::shared_ptr<IMicrophoneService>);
 	IIntent* GetIntent();
+	IIntent* GetConfirmation();
 	~PicoSpeechToIntentService();
 private:
 	void StartRhino();
 	void StopRhino();
+
+	bool ProcessFrame();
+	IIntent* Finalize();
 
 	int16_t* pcm_ = nullptr;
 	std::shared_ptr<IMicrophoneService> microhpone_;

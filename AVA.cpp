@@ -52,13 +52,11 @@ int main()
     cout << "||                                                                           ||" << endl;
     cout << "###############################################################################" << endl;
     cout << "||  TODO List:                                                               ||" << endl;
-    cout << "||  -Refactrizar codigo python modulo ava mantener ciclo                     ||" << endl;
-    cout << "||  -Hacer que el modulo note_taker haga su funcion                          ||" << endl;
     cout << "||  -Corra ava sin ventana y al inciar compu                                 ||" << endl;
     cout << "||  -logger thread-safe2                                                     ||" << endl;
     cout << "###############################################################################" << endl;
 
-    LoggerFactory::SetLoggingLevel(DEBUG);
+    LoggerFactory::SetLoggingLevel(INFO);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();

@@ -26,12 +26,14 @@ public:
 	void StartAvA();
 	~FrameworkManager();
 private:
-
+	void LoadModules();
 	void ListenForWakeUpWord();
-	void ProcessIntent();
+	bool ProcessAvaCommand(std::unique_ptr<IIntent> intent);
+	void ProcessIntent(std::unique_ptr<IIntent> intent);
 	bool ProcessModuleMsg(zmq::message_t&);
 	void SayText(std::string, bool async = false, std::string = "en-us");
 	void SaySsml(std::string, bool async = false, std::string = "en-us");
+	IIntent* GetConfirmation();
 	std::string GetText(int);
 	IIntent* GetIntent();
 	

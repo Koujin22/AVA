@@ -42,6 +42,13 @@ ModuleService::ModuleService() : LoggerFactory(this) {
 
 ModuleService::~ModuleService() {
     LogInfo() << "Shutting down modules...";
+    UnloadModules();
+    CloseHandle(hjob_);
+    LogInfo() << "Modules service has been shut down.";
+};
+
+
+void ModuleService::UnloadModules() {
     std::list<PROCESS_INFORMATION>::iterator it;
     for (it = hproces_.begin(); it != hproces_.end(); it++)
     {
@@ -64,9 +71,9 @@ ModuleService::~ModuleService() {
         CloseHandle(it->hProcess);
     }
 
-    CloseHandle(hjob_);
-    LogInfo() << "Modules service has been shut down.";
-};
+    hproces_.clear();
+}
+
 
 int ModuleService::CountModules() {
     int count = 0;

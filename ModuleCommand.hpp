@@ -8,6 +8,7 @@ public:
 	const std::string& GetParam();
 	const std::string& GetVars();
 	bool IsAsync();
+	int GetTime();
 	std::string GetLang();
 	std::string ToString();
 private:

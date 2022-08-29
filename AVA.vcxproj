@@ -194,6 +194,7 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     <ClCompile Include="FrameworkManager.cpp" />
     <ClCompile Include="GoogleSpeechToTextService.cpp" />
     <ClCompile Include="GoogleTextToSpeechService.cpp" />
+    <ClCompile Include="ModuleCommand.cpp" />
     <ClCompile Include="ModuleService.cpp" />
     <ClCompile Include="PicoIntent.cpp" />
     <ClCompile Include="PicoRecorderService.cpp" />
@@ -213,6 +214,7 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     <ClInclude Include="ITextToSpeechService.hpp" />
     <ClInclude Include="IWakeUpService.hpp" />
     <ClInclude Include="Logging.hpp" />
+    <ClInclude Include="ModuleCommand.hpp" />
     <ClInclude Include="ModuleService.hpp" />
     <ClInclude Include="PicoIntent.hpp" />
     <ClInclude Include="PicoRecorderService.hpp" />

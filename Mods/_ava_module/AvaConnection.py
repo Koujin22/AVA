@@ -1,8 +1,6 @@
 import zmq
 import time
 import string
-
-
 class BadHandShake(Exception):
     pass
 

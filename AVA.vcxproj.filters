@@ -60,6 +60,9 @@
     <ClCompile Include="ModuleService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleCommand.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FrameworkManager.hpp">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="WindowsUtil.hpp">
       <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleCommand.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

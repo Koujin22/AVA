@@ -36,8 +36,7 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 	zmq_context_{ new zmq::context_t(1) },
 	zmq_pub_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_PUB) },
 	zmq_rep_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_REP) },
-	module_service_{ new ModuleService() }
-{ 
+	module_service_{ new ModuleService() } { 
 
 	try {
 		LogInfo() << "Starting framework manager...";
@@ -47,53 +46,8 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 		zmq_rep_socket_->set(zmq::sockopt::rcvtimeo, 5000);
 		LogInfo() << "Starting modules...";
 
-
-		int subs = module_service_->CountModules();
-
-		std::thread t1(&IModuleService::LoadModules, module_service_);
-
-		std::unordered_set <string> list_of_intents;
-
-		LogInfo() << "Connecting to modules...";
-		std::string msg;
-		while (subs > 0) {
-			zmq::message_t msg;
-			zmq::recv_result_t result = zmq_rep_socket_->recv(msg);
-			if (msg.empty()) {
-				LogError() << "Module connection timeout!";
-				exit(1);
-			}
-			std::string content_msg = msg.to_string();
-
-			if (content_msg.find(":") == -1 || content_msg.find("#") == -1) {
-				LogError() << "Modules must have the following pattern. <name>:syn#<intent> message recv was " << content_msg;
-				exit(1);
-			}
-
-			std::string_view module_name{ content_msg.data(), content_msg.find(":") };
-			std::string_view syn_part{ content_msg.data() + content_msg.find(":")+1,   content_msg.find("#") - content_msg.find(":") -1};
-			std::string intent_name = content_msg.substr(content_msg.find("#") + 1, content_msg.size() - content_msg.find("#") );
-
-			if (list_of_intents.find(intent_name) != list_of_intents.end()) {
-				LogError() << "Found duplicate modules listening to the same intent category. Intent: " << intent_name;
-				exit(1);
-			}
-			else if (syn_part != "syn" || module_name.size() == 0 || intent_name.size() == 0) {
-				LogError() << "Modules must have the following pattern. <name>:syn#<intent> message recv was " << content_msg;
-				exit(1);
-			} 
-
-			LogDebug() << "Module: |" << module_name << "| syn: |" << syn_part << "| intent: |" << intent_name << "|. Sending akg";
-
-			list_of_intents.insert(intent_name);
-			
-			(void)zmq_rep_socket_->send(zmq::str_buffer("akg"));
-			
-			subs--;
-		}
-		LogInfo() << "Modules ready";
+		LoadModules();
 		
-		t1.join();
 	}
 	catch(zmq::error_t &t) {
 		LogError() << t.what();
@@ -101,6 +55,55 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 	}
 
 };
+
+void FrameworkManager::LoadModules() {
+	int subs = module_service_->CountModules();
+
+	std::thread t1(&IModuleService::LoadModules, module_service_);
+
+	std::unordered_set <string> list_of_intents;
+
+	LogInfo() << "Connecting to modules...";
+	std::string msg;
+	while (subs > 0) {
+		zmq::message_t msg;
+		zmq::recv_result_t result = zmq_rep_socket_->recv(msg);
+		if (msg.empty()) {
+			LogError() << "Module connection timeout!";
+			exit(1);
+		}
+		std::string content_msg = msg.to_string();
+
+		if (content_msg.find(":") == -1 || content_msg.find("#") == -1) {
+			LogError() << "Modules must have the following pattern. <name>:syn#<intent> message recv was " << content_msg;
+			exit(1);
+		}
+
+		std::string_view module_name{ content_msg.data(), content_msg.find(":") };
+		std::string_view syn_part{ content_msg.data() + content_msg.find(":") + 1,   content_msg.find("#") - content_msg.find(":") - 1 };
+		std::string intent_name = content_msg.substr(content_msg.find("#") + 1, content_msg.size() - content_msg.find("#"));
+
+		if (list_of_intents.find(intent_name) != list_of_intents.end()) {
+			LogError() << "Found duplicate modules listening to the same intent category. Intent: " << intent_name;
+			exit(1);
+		}
+		else if (syn_part != "syn" || module_name.size() == 0 || intent_name.size() == 0) {
+			LogError() << "Modules must have the following pattern. <name>:syn#<intent> message recv was " << content_msg;
+			exit(1);
+		}
+
+		LogDebug() << "Module: |" << module_name << "| syn: |" << syn_part << "| intent: |" << intent_name << "|. Sending akg";
+
+		list_of_intents.insert(intent_name);
+
+		(void)zmq_rep_socket_->send(zmq::str_buffer("akg"));
+
+		subs--;
+	}
+	LogInfo() << "Modules ready";
+
+	t1.join();
+}
 
 void FrameworkManager::StartAvA() {
 	
@@ -112,15 +115,39 @@ void FrameworkManager::StartAvA() {
 		ListenForWakeUpWord();
 
 		SayText("What can I do for you sir?", true);
-		ProcessIntent();
+
+		std::unique_ptr<IIntent> intent(GetIntent());
+		if (intent->GetModule() == "AVA") {
+			turn_off = ProcessAvaCommand(move(intent));
+		}
+		else {
+			ProcessIntent(move(intent));
+		}
 		
 	}
 	SayText("Goodbye sir");
 
 }
 
-void FrameworkManager::ProcessIntent() {
-	std::unique_ptr<IIntent> intent(GetIntent());
+bool FrameworkManager::ProcessAvaCommand(std::unique_ptr<IIntent> intent) {
+	LogDebug() << "Got ava command. action: " << intent->GetAction();
+	bool turn_off = false;
+	if (intent->GetAction() == "turnoff") {
+		turn_off = true;
+	}
+	else if (intent->GetAction() == "reload_modules") {
+		SayText("Reloading modules!");
+		zmq::message_t stop{ std::string{"MODULES_stop"} };
+		zmq_pub_socket_->send(stop, zmq::send_flags::none);
+		module_service_->UnloadModules();
+		LoadModules();
+		SayText("Modules have been reloaded");
+	}
+	intent.reset();
+	return turn_off;
+}
+
+void FrameworkManager::ProcessIntent(std::unique_ptr<IIntent> intent) {
 	LogDebug() << "Broadcasting intent: " << intent->ToString();
 	BroadCastIntent(*intent);
 	bool is_done = false;
@@ -146,6 +173,8 @@ bool FrameworkManager::ProcessModuleMsg(zmq::message_t& msg) {
 	LogDebug() << "Got msg back. Msg: |" << msg_view << "|";
 	if (msg_view == "done") {
 		LogVerbose() << "No action required from ava framework. Continuing";
+		zmq::message_t done{ std::string{"done"} };
+		zmq_rep_socket_->send(done, zmq::send_flags::none);
 		return true;
 	}
 	else {
@@ -155,14 +184,27 @@ bool FrameworkManager::ProcessModuleMsg(zmq::message_t& msg) {
 		if (mod_command.GetCommand() == "say") {
 
 			SayText(mod_command.GetParam(), mod_command.IsAsync(), mod_command.GetLang());
-			zmq::message_t empty_msg{ std::string{"Done"} };
+			zmq::message_t empty_msg{ std::string{"okay"} };
 			zmq_rep_socket_->send(empty_msg, zmq::send_flags::none);
 		}
 		else if (mod_command.GetCommand() == "say-listen") {
 
 			SayText(mod_command.GetParam(), mod_command.IsAsync(), mod_command.GetLang());
-			zmq::message_t dication{ GetText(10) };
+			zmq::message_t dication( GetText(mod_command.GetTime()) );
+			LogDebug() << "Sending dictation: " << dication.str();
 			zmq_rep_socket_->send(dication, zmq::send_flags::none);
+		}
+		else if (mod_command.GetCommand() == "confirm") {
+			SayText(mod_command.GetParam(), mod_command.IsAsync(), mod_command.GetLang());
+			IIntent* intent = GetConfirmation();
+			if (intent == nullptr) {
+				zmq::message_t confirmation(std::string{ "" });
+				zmq_rep_socket_->send(confirmation, zmq::send_flags::none);
+			}
+			else {
+				zmq::message_t confirmation(intent->GetAction());
+				zmq_rep_socket_->send(confirmation, zmq::send_flags::none);
+			}
 		}
 		return false;
 	}
@@ -176,7 +218,6 @@ void FrameworkManager::BroadCastIntent(IIntent& intent) {
 void FrameworkManager::ListenForWakeUpWord() {
 	wake_up_service_->WaitForWakeUp();
 }
-
 
 string FrameworkManager::GetText(int seconds) {
 	return speech_to_text_service_->GetText(seconds);
@@ -192,12 +233,16 @@ void FrameworkManager::SaySsml(string msg, bool async, string language) {
 	else text_to_speech_service_->SaySsml(msg, language);
 }
 
+IIntent* FrameworkManager::GetConfirmation() {
+	return speech_to_intent_service_->GetConfirmation();
+}
+
 IIntent* FrameworkManager::GetIntent() {
-	IIntent* intent;
+	IIntent* intent = nullptr;
 	while (!intent) {
 		intent = speech_to_intent_service_->GetIntent();
 		if (!intent) {
-			SayText("Sorry, I couldn't get that. Could you repeat again, sir?", true);
+			SayText("Sorry, I couldn't get that. Could you repeat again, sir?");
 		}
 	}
 	return intent;

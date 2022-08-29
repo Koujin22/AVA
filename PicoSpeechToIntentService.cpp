@@ -3,6 +3,7 @@
 #include "IMicrophoneService.hpp"
 #include "PicoIntent.hpp"
 #include <pv_rhino.h>
+#include <chrono>
 
 PicoSpeechToIntentService::PicoSpeechToIntentService(std::shared_ptr<IMicrophoneService> microphone_service) : LoggerFactory(this), microhpone_{ microphone_service } {
 	LogInfo() << "Starting speech-to-intent service...";
@@ -58,51 +59,88 @@ IIntent* PicoSpeechToIntentService::GetIntent() {
 
 
     bool is_finalized = false;
-    IIntent* intent_ptr = nullptr;
+
     while (!is_finalized) {
-        microhpone_->GetPcm(pcm_);
-        pv_status_t status = pv_rhino_process(rhino_, pcm_, &is_finalized);
-        if (status != PV_STATUS_SUCCESS) {
-            LogError() << "Failed to process pcm frame. " << pv_status_to_string(status);
-        }
-
-        if (is_finalized) {
-            bool is_understood = false;
-            status = pv_rhino_is_understood(rhino_, &is_understood);
-            if (status != PV_STATUS_SUCCESS) {
-                LogError() << "Failed to check if understood. " << pv_status_to_string(status);
-            }
-
-            if (is_understood) {
-                const char* intent = NULL;
-                int32_t num_slots = 0;
-                const char** slots = NULL;
-                const char** values = NULL;
-                status = pv_rhino_get_intent(rhino_, &intent, &num_slots, &slots, &values);
-                if (status != PV_STATUS_SUCCESS) {
-                    LogError() << "Failed to get intent. " << pv_status_to_string(status);
-                }
-
-                // add code to take action based on inferred intent and slot values
-
-                if (slots != nullptr && values != nullptr) {
-                    LogInfo() << "Got intent. Intent: " << intent << " Slots: " << *slots << " Values: " << *values;
-                }
-                else {
-                    LogInfo() << "Got intent. Intent: " << intent;
-                }
-                intent_ptr = new PicoIntent(intent, num_slots, slots, values);
-
-                pv_rhino_free_slots_and_values(rhino_, slots, values);
-            }
-            else {
-                // add code to handle unsupported commands
-                LogDebug() << "Couldnt understand.";
-            }
-
-            pv_rhino_reset(rhino_);
-        }
+        is_finalized = ProcessFrame();
     }
+    return Finalize();
+}
+
+IIntent* PicoSpeechToIntentService::GetConfirmation() {
+
+    LogInfo() << "Start speech-to-intent process. Getting confirmation";
+
+
+    bool is_finalized = false;
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    while (!is_finalized) {
+        if (std::chrono::steady_clock::now() - start > std::chrono::seconds(5)) {
+            LogDebug() << "Unable to understand confirmation.";
+            pv_rhino_reset(rhino_);
+            return nullptr;
+        }
+        is_finalized = ProcessFrame();
+    }
+
+    IIntent* intent = Finalize();
+
+    if (intent->GetModule() == "AVA" && (intent->GetAction() == "yes" || intent->GetAction() == "no")) {
+        return intent;
+    }
+    else {
+        return nullptr;
+    }
+}
+
+bool PicoSpeechToIntentService::ProcessFrame() {
+    bool is_finalized = false;
+    microhpone_->GetPcm(pcm_);
+    pv_status_t status = pv_rhino_process(rhino_, pcm_, &is_finalized);
+    if (status != PV_STATUS_SUCCESS) {
+        LogError() << "Failed to process pcm frame. " << pv_status_to_string(status);
+    }
+    return is_finalized;
+}
+
+IIntent* PicoSpeechToIntentService::Finalize() {
+
+    bool is_understood = false;
+
+    pv_status_t status = pv_rhino_is_understood(rhino_, &is_understood);
+    if (status != PV_STATUS_SUCCESS) {
+        pv_rhino_reset(rhino_);
+        LogError() << "Failed to check if understood. " << pv_status_to_string(status);
+        return nullptr;
+    }
+    else if (!is_understood) {
+        pv_rhino_reset(rhino_);
+        LogDebug() << "Couldnt understand.";
+        return nullptr;
+    }
+
+
+    IIntent* intent_ptr = nullptr;
+    const char* intent = NULL;
+    int32_t num_slots = 0;
+    const char** slots = NULL;
+    const char** values = NULL;
+
+    status = pv_rhino_get_intent(rhino_, &intent, &num_slots, &slots, &values);
+    if (status != PV_STATUS_SUCCESS) {
+        LogError() << "Failed to get intent. " << pv_status_to_string(status);
+        pv_rhino_reset(rhino_);
+        return intent_ptr;
+    } 
+    if (slots != nullptr && values != nullptr) {
+        LogInfo() << "Got intent. Intent: " << intent << " Slots: " << *slots << " Values: " << *values;
+    }
+    else {
+        LogInfo() << "Got intent. Intent: " << intent;
+    }
+    intent_ptr = new PicoIntent(intent, num_slots, slots, values);
+
+    pv_rhino_free_slots_and_values(rhino_, slots, values);
+    pv_rhino_reset(rhino_);
     return intent_ptr;
 }
 

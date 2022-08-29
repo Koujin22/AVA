@@ -10,7 +10,7 @@ public:
 	~ModuleService();
 
 	int CountModules();
-
+	void UnloadModules();
 	void LoadModules();
 private:
 	void StartModule(std::string);

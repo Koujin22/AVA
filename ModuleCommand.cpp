@@ -8,7 +8,7 @@ ModuleCommand::ModuleCommand(std::string_view msg) :
 ModuleCommand::ModuleCommand(std::string_view msg_view, int end_command) :
 	command_{ msg_view.data(), end_command },
 	param_{msg_view.data() +end_command+1, msg_view.find("#") - end_command - 1 },
-	vars_{msg_view.data()+ msg_view.find("#") + 1 } {
+	vars_{msg_view.data()+ msg_view.find("#") + 1, msg_view.size() - msg_view.find("#") - 1} {
 }
 
 const string& ModuleCommand::GetCommand() { return command_; }
@@ -24,9 +24,16 @@ string ModuleCommand::GetLang() {
 	if (vars_.find('L') == -1) {
 		return "en-us";
 	}
-	return  vars_.substr(vars_.find('L') + 1);
+	return  vars_.substr(vars_.find('L') + 1, vars_.find('L') + 3);
+}
+
+int ModuleCommand::GetTime() {
+	if (vars_.find('T') == -1) {
+		return 10;
+	}
+	return std::stoi(vars_.substr(vars_.find('T') + 1, vars_.find('T') + 2));
 }
 
 string ModuleCommand::ToString() {
-	return "Command: " + command_ + " Param: " + param_ + " Vars: " + vars_;
+	return "Command: " + command_ + " Vars: " + vars_ + "\nParam: " + param_;
 }

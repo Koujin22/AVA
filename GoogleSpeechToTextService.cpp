@@ -80,7 +80,13 @@ std::string GoogleSpeechToTextService::GetText(int seconds) {
 	google::cloud::v2_1_0::StatusOr<speech::v1::RecognizeResponse> response;
 	response = client_->Recognize(config, audio);
 
-	if (!response) throw std::runtime_error(response.status().message());
+	if (!response || !response.ok()) throw std::runtime_error(response.status().message());
+	
+	if (response->results_size() == 0) {
+		LogInfo() << "Empty dictation. Returning empty string";
+		return "";
+	}
+
 	LogDebug() << "Debug info: " << response->DebugString();
 	std::string result = response->results().Get(0).alternatives(0).transcript();
 	LogInfo() << "Process audio: " << result;
