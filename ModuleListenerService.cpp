@@ -6,12 +6,21 @@
 
 volatile bool ModuleListenerService::status_ = false;
 
-ModuleListenerService::ModuleListenerService(ModuleActivatedService& module_activated, ModuleCommunicationService& module_communication) :
+ModuleListenerService::ModuleListenerService(ModuleActivatedService& module_activated, zmq::context_t& context) :
 	LoggerFactory(this),
-	module_communication_{ module_communication },
-	module_activated_{module_activated} {
-	
+	zmq_rep_socket_{ new zmq::socket_t(context, ZMQ_REP) },
+	module_activated_{module_activated} { 
 
+	try {
+
+		LogVerbose() << "Binding pub and rep sockets.";
+		zmq_rep_socket_->bind("tcp://127.0.0.1:5502");
+		zmq_rep_socket_->set(zmq::sockopt::rcvtimeo, 1000);
+	}
+	catch (zmq::error_t& t) {
+		LogError() << t.what();
+		exit(1);
+	}
 }
 
 void ModuleListenerService::Start() {
@@ -22,7 +31,7 @@ void ModuleListenerService::Start() {
 	status_ = true;
 	while (status_) {
 		zmq::message_t msg;
-		module_communication_.RecvMsgFromModule(msg);
+		(void)zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
 		if (msg.empty()) continue;
 		//msg expected is <name>:req#<priority>
 		std::string msg_content = msg.to_string();
@@ -33,7 +42,7 @@ void ModuleListenerService::Start() {
 		if(colon_pos == -1 || hash_pos == -1 || colon_pos == 0 || hash_pos == msg_content.size()-1 || msg_content.substr(colon_pos + 1, 3) != "req") {
 			LogWarn() << "Got invalid request from module. " << msg_content;
 			zmq::message_t response{ std::string{"invalid"} };
-			module_communication_.SendMsgToModule(response);
+			zmq_rep_socket_->send(response, zmq::send_flags::none);
 			continue;
 		} 
 		ModuleRequest req{ msg_content, colon_pos, hash_pos };
@@ -41,7 +50,7 @@ void ModuleListenerService::Start() {
 		
 		LogInfo() << "Got valid request. Adding to queue.";
 		zmq::message_t response{ std::string{"ok"} };
-		module_communication_.SendMsgToModule(response);
+		zmq_rep_socket_->send(response, zmq::send_flags::none);
 		module_activated_.Notify(req);
 
 	}
@@ -52,4 +61,10 @@ void ModuleListenerService::Stop() {
 		LogWarn() << "Tried to stop when it wasnt running.";
 	}
 	status_ = false;
+}
+
+ModuleListenerService::~ModuleListenerService() {
+	zmq_rep_socket_->set(zmq::sockopt::linger, 1);
+	zmq_rep_socket_->close();
+	delete zmq_rep_socket_;
 }

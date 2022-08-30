@@ -15,9 +15,9 @@ class IIntent;
 
 class ModuleCommunicationService : private LoggerFactory {
 public:
-	ModuleCommunicationService(FrameworkManager& framework);
+	ModuleCommunicationService(FrameworkManager& framework, zmq::context_t&);
 
-	void RecvMsgFromModule(zmq::message_t&);
+	zmq::message_t RecvMsgFromModule();
 	void SendMsgToModule(zmq::message_t&);
 	void BroadCastMsg(zmq::message_t&);
 	void BroadCastIntent(std::unique_ptr<IIntent> intent);
@@ -32,7 +32,6 @@ private:
 	std::mutex mutex_;
 	std::condition_variable condition_variable_;
 
-	zmq::context_t* const zmq_context_;
 	zmq::socket_t* const zmq_pub_socket_;
 	zmq::socket_t* const zmq_rep_socket_;
 };

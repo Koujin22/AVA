@@ -37,20 +37,18 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 	speech_to_intent_service_{ new PicoSpeechToIntentService(microphone_service) },
 	speech_to_text_service_{ new GoogleSpeechToTextService(microphone_service) },
 
-	module_communication_service_  { new ModuleCommunicationService(*this) },
-	
+	zmq_context_{ new zmq::context_t() },
 
+	module_communication_service_  { new ModuleCommunicationService(*this, *zmq_context_) },
 	module_activated_service_ { new ModuleActivatedService(*this, *module_communication_service_)},
-	communication_thread_{ &ModuleActivatedService::Start, module_activated_service_ },
-
-	module_listener_{ new ModuleListenerService(*module_activated_service_, *module_communication_service_) },
-	listener_thread_{ &ModuleListenerService::Start, module_listener_ },
-
+	//module_listener_{ new ModuleListenerService(*module_activated_service_, *zmq_context_) },
 	module_service_{ new ModuleLoaderService() }{
 
 	try {
 		LogInfo() << "Starting framework manager...";
 		LoadModules();
+
+		communication_thread_ = new std::thread(& ModuleActivatedService::Start, module_activated_service_ );
 		
 	}
 	catch(zmq::error_t &t) {
@@ -70,8 +68,7 @@ void FrameworkManager::LoadModules() {
 	LogInfo() << "Connecting to modules...";
 	std::string msg;
 	while (subs > 0) {
-		zmq::message_t msg;
-		(void)module_communication_service_->RecvMsgFromModule(msg);
+		zmq::message_t msg = module_communication_service_->RecvMsgFromModule();
 		if (msg.empty()) {
 			LogError() << "Module connection timeout!";
 			exit(1);
@@ -168,8 +165,7 @@ void FrameworkManager::ProcessIntent(std::unique_ptr<IIntent> intent) {
 	bool is_done = false;
 	while (!is_done) {
 		LogDebug() << "Waiting on modules response";
-		zmq::message_t msg;
-		module_communication_service_->RecvMsgFromModule(msg);
+		zmq::message_t msg = module_communication_service_->RecvMsgFromModule();
 
 		if (msg.empty()) {
 			LogWarn() << "Got no response from module.";
@@ -183,7 +179,6 @@ void FrameworkManager::ProcessIntent(std::unique_ptr<IIntent> intent) {
 		
 	}
 }
-
 
 void FrameworkManager::ListenForWakeUpWord() {
 	wake_up_service_->WaitForWakeUp();
@@ -223,14 +218,29 @@ FrameworkManager::~FrameworkManager() {
 	zmq::message_t stop{ std::string{"MODULES_stop"} };
 	module_communication_service_->BroadCastMsg(stop);
 	
-	module_listener_->Stop();
-	module_activated_service_->Stop();
-	listener_thread_.join();
-	communication_thread_.join();
 
+	module_activated_service_->Stop();
+	LogDebug() << "Joining listener";
+	LogDebug() << "Joining coms";
+	communication_thread_->join();
+	
+	LogDebug() << "1";
+	delete communication_thread_;
+	LogDebug() << "2";
+	delete listener_thread_;
+	LogDebug() << "3";
 	delete module_service_;
-	delete module_listener_;
+	LogDebug() << "4";
+	//delete module_listener_;
+	LogDebug() << "5";
 	delete module_activated_service_;
+	LogDebug() << "6";
+
+	zmq_context_->close();
+	LogDebug() << "7";
+	delete zmq_context_;
+	LogDebug() << "8";
+
 	delete text_to_speech_service_;
 	delete wake_up_service_;
 	delete speech_to_intent_service_;

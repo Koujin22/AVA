@@ -52,6 +52,8 @@ int main()
     cout << "||                                                                           ||" << endl;
     cout << "###############################################################################" << endl;
     cout << "||  TODO List:                                                               ||" << endl;
+    cout << "||  -Checar unused imports y refactorizar codigo                             ||" << endl;
+    cout << "||  -Sincronizar acceso a module comms                                       ||" << endl;
     cout << "||  -Corra ava sin ventana y al inciar compu                                 ||" << endl;
     cout << "||  -logger thread-safe2                                                     ||" << endl;
     cout << "###############################################################################" << endl;

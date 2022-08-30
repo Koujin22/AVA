@@ -39,8 +39,7 @@ void ModuleActivatedService::Start() {
 		bool is_done = false;
 		while (!is_done) {
 			LogDebug() << "Waiting on modules response";
-			zmq::message_t msg;
-			module_communication_service_.RecvMsgFromModule(msg);
+			zmq::message_t msg = module_communication_service_.RecvMsgFromModule();
 
 			if (msg.empty()) {
 				LogWarn() << "Got no response from module.";

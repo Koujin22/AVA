@@ -51,14 +51,16 @@ private:
 	ISpeechToIntentService* const speech_to_intent_service_;
 	ISpeechToTextService* const speech_to_text_service_;
 
+	zmq::context_t* zmq_context_;
+
 	//Module resources
 	ModuleCommunicationService* const module_communication_service_;
 	ModuleActivatedService* const module_activated_service_;
-	std::thread communication_thread_;
-	ModuleListenerService* const module_listener_;
-	std::thread listener_thread_;
+	//ModuleListenerService* const module_listener_;
 	IModuleLoaderService* const module_service_;
 
+	std::thread* listener_thread_;
+	std::thread* communication_thread_;
 
 	
 };

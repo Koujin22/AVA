@@ -18,15 +18,17 @@ class ModuleCommunicationService;
 
 class ModuleListenerService : private LoggerFactory {
 public:
-	ModuleListenerService(ModuleActivatedService&, ModuleCommunicationService&);
+	ModuleListenerService(ModuleActivatedService&, zmq::context_t&);
 
 	void Start();
 
 	void Stop();
+
+	~ModuleListenerService();
 private:
 	static volatile bool status_;
-	ModuleCommunicationService& module_communication_;
 	ModuleActivatedService& module_activated_;
 
+	zmq::socket_t* const zmq_rep_socket_;
 
 };

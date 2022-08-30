@@ -3,15 +3,15 @@
 #include "IIntent.hpp"
 #include "FrameworkManager.hpp"
 #include <zmq.hpp>
+#include <memory>
 
 
 
-ModuleCommunicationService::ModuleCommunicationService(FrameworkManager& framework) : 
+ModuleCommunicationService::ModuleCommunicationService(FrameworkManager& framework, zmq::context_t& zmq_context) :
 	LoggerFactory(this),
 	framework_ { framework },
-	zmq_context_ { new zmq::context_t() },
-	zmq_pub_socket_ { new zmq::socket_t(*zmq_context_, ZMQ_PUB) },
-	zmq_rep_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_REP) }
+	zmq_pub_socket_ { new zmq::socket_t(zmq_context, ZMQ_PUB) },
+	zmq_rep_socket_{ new zmq::socket_t(zmq_context, ZMQ_REP) }
 {
 	try{
 
@@ -67,8 +67,10 @@ zmq::message_t ModuleCommunicationService::ProcessModuleMsg(zmq::message_t& msg)
 	}
 }
 
-void ModuleCommunicationService::RecvMsgFromModule(zmq::message_t& msg) {
+zmq::message_t ModuleCommunicationService::RecvMsgFromModule() {
+	zmq::message_t msg;
 	(void) zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
+	return msg;
 }
 
 void ModuleCommunicationService::SendMsgToModule(zmq::message_t& msg) {
@@ -87,7 +89,10 @@ void ModuleCommunicationService::BroadCastIntent(std::unique_ptr<IIntent> intent
 }
 
 ModuleCommunicationService::~ModuleCommunicationService() {
+	zmq_pub_socket_->set(zmq::sockopt::linger, 1);
+	zmq_pub_socket_->close();
+	zmq_rep_socket_->set(zmq::sockopt::linger, 1);
+	zmq_rep_socket_->close();
 	delete zmq_pub_socket_;
 	delete zmq_rep_socket_;
-	delete zmq_context_;
 }
