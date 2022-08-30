@@ -1,9 +1,7 @@
 #pragma once
 #include "Logging.hpp"
-#include <queue>
 #include <mutex>
 #include <condition_variable>
-#include "ModuleRequest.hpp"
 
 class FrameworkManager;
 
@@ -13,32 +11,28 @@ namespace zmq {
 	class context_t;
 }
 
-class ModuleCommunicationService : LoggerFactory {
+class IIntent;
+
+class ModuleCommunicationService : private LoggerFactory {
 public:
-	ModuleCommunicationService(FrameworkManager&, zmq::context_t&);
+	ModuleCommunicationService(FrameworkManager& framework);
 
-	void Start();
-
-	void Notify(ModuleRequest);
-	void Pause();
-	void Resume();
-	void Cancel();
-
-	void Stop();
+	void RecvMsgFromModule(zmq::message_t&);
+	void SendMsgToModule(zmq::message_t&);
+	void BroadCastMsg(zmq::message_t&);
+	void BroadCastIntent(std::unique_ptr<IIntent> intent);
 
 	zmq::message_t ProcessModuleMsg(zmq::message_t&);
 
 	~ModuleCommunicationService();
 
 private:
+
 	FrameworkManager& framework_;
-
-	zmq::socket_t* zmq_rep_socket_;
-	zmq::socket_t* zmq_pub_socket_;
-
-	std::priority_queue<ModuleRequest, std::vector<ModuleRequest>, ModuleRequestComparator> request_queue_;
 	std::mutex mutex_;
 	std::condition_variable condition_variable_;
-	static volatile bool status_;
-	static volatile bool recheck_;
+
+	zmq::context_t* const zmq_context_;
+	zmq::socket_t* const zmq_pub_socket_;
+	zmq::socket_t* const zmq_rep_socket_;
 };

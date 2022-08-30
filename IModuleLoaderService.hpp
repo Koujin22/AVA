@@ -1,8 +1,8 @@
 #pragma once
 
-class IModuleService {
+class IModuleLoaderService {
 public:
-	virtual ~IModuleService() {};
+	virtual ~IModuleLoaderService() {};
 	virtual void LoadModules() = 0;
 	virtual void UnloadModules() = 0;
 	virtual int CountModules() = 0;

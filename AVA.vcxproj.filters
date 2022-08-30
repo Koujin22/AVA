@@ -19,28 +19,37 @@
     <Filter Include="Archivos de encabezado\Framework">
       <UniqueIdentifier>{222401d9-4edf-4788-924f-90def509624c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Archivos de encabezado\Util">
-      <UniqueIdentifier>{aab9d6dd-1a27-4d6e-a30a-7e04f80baebe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Archivos de origen\Util">
-      <UniqueIdentifier>{18231485-d84c-495a-af28-fb7fc6cdab8a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Archivos de encabezado\Framework\Interface">
       <UniqueIdentifier>{0a00e0dd-053c-46ba-a361-371c71bbb4f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Framework\Util">
+      <UniqueIdentifier>{18231485-d84c-495a-af28-fb7fc6cdab8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Modules">
+      <UniqueIdentifier>{9d261b4c-93aa-4be3-a06c-533ba55f5d26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Modules">
+      <UniqueIdentifier>{2dca49a0-ed62-4fc0-a82f-e516697947e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Framework\Util">
+      <UniqueIdentifier>{aab9d6dd-1a27-4d6e-a30a-7e04f80baebe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Modules\Model">
+      <UniqueIdentifier>{f9d8ddf5-5ddf-40b9-8ec2-e65b7e4e5db8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Modules\Model">
+      <UniqueIdentifier>{1afe236b-9f6e-4fb0-8c93-88c6c520d999}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="FrameworkManager.cpp">
-      <Filter>Archivos de origen\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="PicoWakeUpService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
     <ClCompile Include="ConfigurationManager.cpp">
-      <Filter>Archivos de origen\Util</Filter>
+      <Filter>Archivos de origen\Framework\Util</Filter>
     </ClCompile>
     <ClCompile Include="GoogleTextToSpeechService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
@@ -57,34 +66,37 @@
     <ClCompile Include="GoogleSpeechToTextService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleService.cpp">
-      <Filter>Archivos de origen\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="ModuleListenerService.cpp">
-      <Filter>Archivos de origen\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleCommand.cpp">
-      <Filter>Archivos de origen\Util</Filter>
+      <Filter>Archivos de origen\Modules\Model</Filter>
     </ClCompile>
     <ClCompile Include="ModuleRequest.cpp">
-      <Filter>Archivos de origen\Util</Filter>
+      <Filter>Archivos de origen\Modules\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleListenerService.cpp">
+      <Filter>Archivos de origen\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleActivatedService.cpp">
+      <Filter>Archivos de origen\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleLoaderService.cpp">
+      <Filter>Archivos de origen\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameworkManager.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="ModuleCommunicationService.cpp">
-      <Filter>Archivos de origen\Framework</Filter>
+      <Filter>Archivos de origen\Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FrameworkManager.hpp">
-      <Filter>Archivos de encabezado\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="PicoWakeUpService.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
     <ClInclude Include="ConfigurationManager.hpp">
-      <Filter>Archivos de encabezado\Util</Filter>
+      <Filter>Archivos de encabezado\Framework\Util</Filter>
     </ClInclude>
     <ClInclude Include="Logging.hpp">
-      <Filter>Archivos de encabezado\Util</Filter>
+      <Filter>Archivos de encabezado\Framework\Util</Filter>
     </ClInclude>
     <ClInclude Include="IWakeUpService.hpp">
       <Filter>Archivos de encabezado\Framework\Interface</Filter>
@@ -119,26 +131,32 @@
     <ClInclude Include="GoogleSpeechToTextService.hpp">
       <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="IModuleService.hpp">
+    <ClInclude Include="IModuleLoaderService.hpp">
       <Filter>Archivos de encabezado\Framework\Interface</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleService.hpp">
-      <Filter>Archivos de encabezado\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="WindowsUtil.hpp">
-      <Filter>Archivos de encabezado\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleListenerService.hpp">
-      <Filter>Archivos de encabezado\Framework</Filter>
+      <Filter>Archivos de encabezado\Framework\Util</Filter>
     </ClInclude>
     <ClInclude Include="ModuleCommand.hpp">
-      <Filter>Archivos de encabezado\Util</Filter>
+      <Filter>Archivos de encabezado\Modules\Model</Filter>
     </ClInclude>
     <ClInclude Include="ModuleRequest.hpp">
-      <Filter>Archivos de encabezado\Util</Filter>
+      <Filter>Archivos de encabezado\Modules\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleActivatedService.hpp">
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleListenerService.hpp">
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleLoaderService.hpp">
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameworkManager.hpp">
+      <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="ModuleCommunicationService.hpp">
-      <Filter>Archivos de encabezado\Framework</Filter>
+      <Filter>Archivos de encabezado\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

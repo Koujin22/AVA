@@ -1,4 +1,4 @@
-#include "ModuleService.hpp"
+#include "ModuleLoaderService.hpp"
 #include "WindowsUtil.hpp"
 #include <string>
 #include <thread>
@@ -9,7 +9,7 @@
 
 
 
-ModuleService::ModuleService() : LoggerFactory(this) {
+ModuleLoaderService::ModuleLoaderService() : LoggerFactory(this) {
     LogVerbose() << "Creating and configuring Job for processess.";
     //std::thread load_modules_thread([this] {LoadModules(); });
     std::string s = "AVA_Service";
@@ -40,7 +40,7 @@ ModuleService::ModuleService() : LoggerFactory(this) {
 
 };
 
-ModuleService::~ModuleService() {
+ModuleLoaderService::~ModuleLoaderService() {
     LogInfo() << "Shutting down modules...";
     UnloadModules();
     CloseHandle(hjob_);
@@ -48,7 +48,7 @@ ModuleService::~ModuleService() {
 };
 
 
-void ModuleService::UnloadModules() {
+void ModuleLoaderService::UnloadModules() {
     std::list<PROCESS_INFORMATION>::iterator it;
     for (it = hproces_.begin(); it != hproces_.end(); it++)
     {
@@ -75,7 +75,7 @@ void ModuleService::UnloadModules() {
 }
 
 
-int ModuleService::CountModules() {
+int ModuleLoaderService::CountModules() {
     int count = 0;
     for (auto& p : std::filesystem::directory_iterator("Mods"))
         if (p.is_directory() && p.path().filename().string().at(0) != '.' && p.path().filename().string().at(0) != '_') {
@@ -84,7 +84,7 @@ int ModuleService::CountModules() {
     return count;
 }
 
-void ModuleService::LoadModules() {
+void ModuleLoaderService::LoadModules() {
 
     std::vector<std::string> r;
     for (auto& p : std::filesystem::directory_iterator("Mods"))
@@ -100,7 +100,7 @@ void ModuleService::LoadModules() {
 }; 
 
 
-void ModuleService::StartModule(std::string module_name) {
+void ModuleLoaderService::StartModule(std::string module_name) {
     LogDebug() << "Starting module " << module_name;// note_taker debe ser dinamico. 
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;

@@ -1,13 +1,13 @@
 #pragma once
-#include "IModuleService.hpp"
+#include "IModuleLoaderService.hpp"
 #include "Logging.hpp"
 #include <Windows.h>
 #include <list>
 
-class ModuleService : public IModuleService, private LoggerFactory {
+class ModuleLoaderService : public IModuleLoaderService, private LoggerFactory {
 public:
-	ModuleService();
-	~ModuleService();
+	ModuleLoaderService();
+	~ModuleLoaderService();
 
 	int CountModules();
 	void UnloadModules();

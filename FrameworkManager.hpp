@@ -11,11 +11,12 @@ class IMicrophoneService;
 class ISpeechToIntentService;
 class ISpeechToTextService;
 class IIntent;
-class IModuleService;
+class IModuleLoaderService;
 class ModuleRequest;
 class ModuleRequestComparator;
-class ModuleCommunicationService;
+class ModuleActivatedService;
 class ModuleListenerService;
+class ModuleCommunicationService;
 
 namespace zmq {
 	class context_t;
@@ -39,24 +40,24 @@ private:
 	void LoadModules();
 	void ListenForWakeUpWord();
 	bool ProcessAvaCommand(std::unique_ptr<IIntent> intent);
-	void ProcessIntent(std::unique_ptr<IIntent> intent);
 	IIntent* GetIntent();
 	
-	void BroadCastIntent(IIntent&);
+	void ProcessIntent(std::unique_ptr<IIntent> intent);
 
 	FrameworkManager(std::shared_ptr<IMicrophoneService>);
+	//Framework resources
 	ITextToSpeechService* const text_to_speech_service_;
 	IWakeUpService* const  wake_up_service_;
 	ISpeechToIntentService* const speech_to_intent_service_;
 	ISpeechToTextService* const speech_to_text_service_;
-	zmq::context_t* const zmq_context_;
-	zmq::socket_t* const zmq_pub_socket_;
-	zmq::socket_t* const zmq_rep_socket_;
-	ModuleCommunicationService* const module_communication_;
+
+	//Module resources
+	ModuleCommunicationService* const module_communication_service_;
+	ModuleActivatedService* const module_activated_service_;
 	std::thread communication_thread_;
 	ModuleListenerService* const module_listener_;
 	std::thread listener_thread_;
-	IModuleService* const module_service_;
+	IModuleLoaderService* const module_service_;
 
 
 	

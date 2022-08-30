@@ -13,21 +13,20 @@ namespace zmq {
 
 class ModuleRequest;
 class ModuleRequestComparator;
+class ModuleActivatedService;
 class ModuleCommunicationService;
 
 class ModuleListenerService : private LoggerFactory {
 public:
-	ModuleListenerService(zmq::context_t&, ModuleCommunicationService&);
+	ModuleListenerService(ModuleActivatedService&, ModuleCommunicationService&);
 
 	void Start();
 
 	void Stop();
-
-	~ModuleListenerService();
-
 private:
-	zmq::socket_t* const zmq_rep_socket_;
 	static volatile bool status_;
 	ModuleCommunicationService& module_communication_;
+	ModuleActivatedService& module_activated_;
+
 
 };

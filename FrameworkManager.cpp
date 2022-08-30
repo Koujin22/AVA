@@ -5,11 +5,12 @@
 #include "PicoSpeechToIntentService.hpp"
 #include "PicoWakeUpService.hpp"
 #include "PicoRecorderService.hpp"
-#include "ModuleService.hpp"
+#include "ModuleLoaderService.hpp"
 #include "IIntent.hpp"
 #include "ModuleRequest.hpp"
-#include "ModuleCommunicationService.hpp"
+#include "ModuleActivatedService.hpp"
 #include "ModuleListenerService.hpp"
+#include "ModuleCommunicationService.hpp"
 #include <zmq.hpp>
 #include <thread>
 #include <unordered_set>
@@ -35,23 +36,20 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 	wake_up_service_{ new PicoWakeUpService(microphone_service) },
 	speech_to_intent_service_{ new PicoSpeechToIntentService(microphone_service) },
 	speech_to_text_service_{ new GoogleSpeechToTextService(microphone_service) },
-	zmq_context_{ new zmq::context_t(1) },
-	zmq_pub_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_PUB) },
-	zmq_rep_socket_{ new zmq::socket_t(*zmq_context_, ZMQ_REP) },
-	module_communication_{ new ModuleCommunicationService(*this, *zmq_context_) },
-	communication_thread_{ &ModuleCommunicationService::Start, module_communication_ },
-	module_listener_{ new ModuleListenerService(*zmq_context_, *module_communication_) },
+
+	module_communication_service_  { new ModuleCommunicationService(*this) },
+	
+
+	module_activated_service_ { new ModuleActivatedService(*this, *module_communication_service_)},
+	communication_thread_{ &ModuleActivatedService::Start, module_activated_service_ },
+
+	module_listener_{ new ModuleListenerService(*module_activated_service_, *module_communication_service_) },
 	listener_thread_{ &ModuleListenerService::Start, module_listener_ },
-	module_service_{ new ModuleService() }{
+
+	module_service_{ new ModuleLoaderService() }{
 
 	try {
 		LogInfo() << "Starting framework manager...";
-		LogVerbose() << "Binding pub and rep sockets.";
-		zmq_pub_socket_->bind("tcp://127.0.0.1:5500");
-		zmq_rep_socket_->bind("tcp://127.0.0.1:5501");
-		zmq_rep_socket_->set(zmq::sockopt::rcvtimeo, 5000);
-		LogInfo() << "Starting modules...";
-
 		LoadModules();
 		
 	}
@@ -65,7 +63,7 @@ FrameworkManager::FrameworkManager(std::shared_ptr<IMicrophoneService> microphon
 void FrameworkManager::LoadModules() {
 	int subs = module_service_->CountModules();
 
-	std::thread t1(&IModuleService::LoadModules, module_service_);
+	std::thread t1(&IModuleLoaderService::LoadModules, module_service_);
 
 	std::unordered_set <string> list_of_intents;
 
@@ -73,7 +71,7 @@ void FrameworkManager::LoadModules() {
 	std::string msg;
 	while (subs > 0) {
 		zmq::message_t msg;
-		zmq::recv_result_t result = zmq_rep_socket_->recv(msg);
+		(void)module_communication_service_->RecvMsgFromModule(msg);
 		if (msg.empty()) {
 			LogError() << "Module connection timeout!";
 			exit(1);
@@ -102,7 +100,8 @@ void FrameworkManager::LoadModules() {
 
 		list_of_intents.insert(intent_name);
 
-		(void)zmq_rep_socket_->send(zmq::str_buffer("akg"));
+		zmq::message_t t{ std::string{"akg"} };
+		module_communication_service_->SendMsgToModule(t);
 
 		subs--;
 	}
@@ -111,7 +110,7 @@ void FrameworkManager::LoadModules() {
 	t1.join();
 
 	zmq::message_t ready(std::string("MODULES:ready"));
-	zmq_pub_socket_->send(ready, zmq::send_flags::none);
+	module_communication_service_->BroadCastMsg(ready);
 
 }
 
@@ -123,7 +122,7 @@ void FrameworkManager::StartAvA() {
 	while (!turn_off) {
 
 		ListenForWakeUpWord();
-		module_communication_->Pause();
+		module_activated_service_->Pause();
 		SayText("What can I do for you sir?", true);
 
 		std::unique_ptr<IIntent> intent(GetIntent());
@@ -134,7 +133,7 @@ void FrameworkManager::StartAvA() {
 			ProcessIntent(move(intent));
 		}
 
-		module_communication_->Resume();
+		module_activated_service_->Resume();
 		
 	}
 	SayText("Goodbye sir");
@@ -150,14 +149,14 @@ bool FrameworkManager::ProcessAvaCommand(std::unique_ptr<IIntent> intent) {
 	else if (intent->GetAction() == "reload_modules") {
 		SayText("Reloading modules!");
 		zmq::message_t stop{ std::string{"MODULES_stop"} };
-		zmq_pub_socket_->send(stop, zmq::send_flags::none);
+		module_communication_service_->SendMsgToModule(stop);
 		module_service_->UnloadModules();
 		LoadModules();
 		SayText("Modules have been reloaded");
 	}
 	else if (intent->GetAction() == "cancel_mod_comm") {
 		SayText("On it!");
-		module_communication_->Cancel();
+		module_activated_service_->Cancel();
 	}
 	intent.reset();
 	return turn_off;
@@ -165,32 +164,26 @@ bool FrameworkManager::ProcessAvaCommand(std::unique_ptr<IIntent> intent) {
 
 void FrameworkManager::ProcessIntent(std::unique_ptr<IIntent> intent) {
 	LogDebug() << "Broadcasting intent: " << intent->ToString();
-	BroadCastIntent(*intent);
+	module_communication_service_->BroadCastIntent(move(intent));
 	bool is_done = false;
 	while (!is_done) {
 		LogDebug() << "Waiting on modules response";
 		zmq::message_t msg;
-		(void)zmq_rep_socket_->recv(msg, zmq::recv_flags::none);
+		module_communication_service_->RecvMsgFromModule(msg);
 
 		if (msg.empty()) {
 			LogWarn() << "Got no response from module.";
 			is_done = true;
 		}
 		else {
-			zmq::message_t response = module_communication_->ProcessModuleMsg(msg);
+			zmq::message_t response = module_communication_service_->ProcessModuleMsg(msg);
 			is_done = response.to_string() == "done";
-			zmq_rep_socket_->send(response, zmq::send_flags::none);
+			module_communication_service_->SendMsgToModule(response);
 		}
 		
 	}
-	intent.reset();
 }
 
-
-void FrameworkManager::BroadCastIntent(IIntent& intent) {
-	zmq::message_t intent_msg(intent.ToString());
-	zmq_pub_socket_->send(intent_msg, zmq::send_flags::none);
-}
 
 void FrameworkManager::ListenForWakeUpWord() {
 	wake_up_service_->WaitForWakeUp();
@@ -228,19 +221,16 @@ IIntent* FrameworkManager::GetIntent() {
 FrameworkManager::~FrameworkManager() {
 	LogInfo() << "Shutting-down ava framework...";
 	zmq::message_t stop{ std::string{"MODULES_stop"} };
-	zmq_pub_socket_->send(stop, zmq::send_flags::none);
+	module_communication_service_->BroadCastMsg(stop);
 	
 	module_listener_->Stop();
-	module_communication_->Stop();
+	module_activated_service_->Stop();
 	listener_thread_.join();
 	communication_thread_.join();
 
 	delete module_service_;
 	delete module_listener_;
-	delete module_communication_;
-	delete zmq_pub_socket_;
-	delete zmq_rep_socket_;
-	delete zmq_context_;
+	delete module_activated_service_;
 	delete text_to_speech_service_;
 	delete wake_up_service_;
 	delete speech_to_intent_service_;
