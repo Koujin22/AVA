@@ -56,7 +56,7 @@ int main()
     cout << "||  -logger thread-safe2                                                     ||" << endl;
     cout << "###############################################################################" << endl;
 
-    LoggerFactory::SetLoggingLevel(DEBUG);
+    LoggerFactory::SetLoggingLevel(INFO);
     config.LoadConfigurations("dev");
 
     FrameworkManager* framework_manager = new FrameworkManager();

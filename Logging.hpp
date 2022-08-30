@@ -38,7 +38,7 @@ public:
 
 		}
 		if (newLevel >= 3) {
-			std::cout << "|"<< GetColorSequence(COLORS::GREEN) << "   INFO" << "\x1B[0m" << "|                      Logger | Setting log level to " << string_new_level << std::endl;
+			std::cout << "|"<< GetColorSequence(COLORS::GREEN) << "   INFO" << "\x1B[0m" << "|                 Logger | Setting log level to " << string_new_level << std::endl;
 		}
 	}
 
@@ -54,7 +54,7 @@ protected:
 	class Logger {
 	public:
 		Logger(std::string name, std::string level, bool will_print, std::string color) : will_print{will_print} {
-			s << "|" << color << std::setw(7) << level << "\x1B[0m" << "| " << std::setw(27) << name << " | ";
+			s << "|" << color << std::setw(7) << level << "\x1B[0m" << "| " << std::setw(22) << name << " | ";
 		};
 
 		template <class T>

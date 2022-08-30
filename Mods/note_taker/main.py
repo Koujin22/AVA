@@ -97,6 +97,7 @@ class Note_taker(Module):
                 self.ava.say("Copy that, cancelling deletion of tasks.")
         except(CouldntConfirm):
             self.ava.say("Sorry, I didnt understand that, but I will cancel the removal of to-do")
+       
 
     def get(self, slots: TypedDict):
         if(len(slots) == 0):
