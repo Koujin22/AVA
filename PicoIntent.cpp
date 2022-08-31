@@ -1,6 +1,12 @@
 #include "PicoIntent.hpp"
+#include "ModuleRequest.hpp"
 
 using std::string;
+
+PicoIntent::PicoIntent(ModuleRequest& req) {
+	module_ = "MODULE_" + req.GetModule();
+	action_ = "start_conversation";
+}
 
 PicoIntent::PicoIntent(const char* intent, int32_t num_slots, const char** slots, const char** values) {
 	string s_intent(intent);

@@ -24,6 +24,7 @@ class AvaConnection():
         self.sub_socket.connect("tcp://127.0.0.1:5500")
         self.sub_socket.setsockopt(zmq.SUBSCRIBE, bytes(intent_name, 'ascii'))
         self.sub_socket.setsockopt(zmq.SUBSCRIBE, b'MODULES')
+        self.sub_socket.setsockopt(zmq.SUBSCRIBE, bytes("MODULE_"+module_name, 'ascii'))
 
         time.sleep(1)
 

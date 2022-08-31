@@ -19,6 +19,9 @@ class InvalidArguments(Exception):
 class CouldntConfirm(Exception):
     pass
 
+class ExpectedStartCommunication(Exception):
+    pass
+
 class SocketState(Enum):
     WAITING_INTENT = 0
     READY_TO_SEND = 1
@@ -68,6 +71,10 @@ class AvaModule(Module):
             if(msg == b'done'):
                 self.timeout.cancel()
                 self.socket_state = SocketState.WAITING_INTENT
+            elif(msg==b'pause'):
+                self.timeout.cancel()
+                self.socket_state = SocketState.WAITING_INTENT
+                self.__waitForCTA()
             else:
                 self.socket_state = SocketState.READY_TO_SEND
                 self.__reset_timeout(time)
@@ -135,9 +142,9 @@ class AvaModule(Module):
         if(autoListen):
             self.__listen_req()
 
-    def sayAndListen(self, msg: str, lang: str = "en-us", asy: bool = False, listen_time: int = 10) -> str:
+    def sayAndListen(self, msg: str, lang: str = "en-us", asy: bool = False, listen_time: int = 5) -> str:
         self.log.info("Saying and listening: %s | Lang: %s | async: %s ", msg, lang, asy)
-        self.__send_req(bytes("say-listen_"+msg+"#A"+('t' if asy else 'f')+"L"+lang+"T"+str(listen_time), 'UTF-8'), len(msg)/10+listen_time+5)
+        self.__send_req(bytes("say-listen_"+msg+"#A"+('t' if asy else 'f')+"L"+lang+"T"+str(listen_time), 'UTF-8'), len(msg)/5+listen_time+5)
         response: bytes = self.__listen_req()
         self.log.debug("Got dictation: %s", response)
         return response.decode()
@@ -152,11 +159,21 @@ class AvaModule(Module):
         msg = response.decode()
         return msg == 'yes'
 
-        
-    def requestCommunication(self, priority: int) -> bool:
+    def startCommunication(self, priority: int) -> bool:
+        self.__requestCommunication(priority)
+        self.__waitForCTA()
+
+    def __waitForCTA(self) -> None:
+        msg = self.__listen_sub()
+        self.log.info(msg)
+        _, action, _ = msg.decode().split(" ", 2)
+        self.log.info("|"+action+"|")
+        if(action != 'start_conversation'):
+            raise ExpectedStartCommunication
+    
+    def __requestCommunication(self, priority: int) -> bool:
         self.connection.send_req_com(bytes(self.module_name+":req#"+str(priority), "ascii"))
         msg = self.connection.recv_req_com()
         
-        self.socket_state = SocketState.READY_TO_SEND
-        self.__reset_timeout(5.0, False)
+        self.socket_state = SocketState.WAITING_INTENT
         return msg==b'ok'

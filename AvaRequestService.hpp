@@ -17,7 +17,10 @@ public:
 	AvaRequestService();
 
 
+	void Notify();
 	void Notify(ModuleRequest& );
+
+	void Add(ModuleRequest&);
 	
 	ModuleRequest WaitForRequest();
 

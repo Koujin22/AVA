@@ -53,7 +53,7 @@ void PicoSpeechToIntentService::StopRhino() {
     free(pcm_);
 }
 
-IIntent* PicoSpeechToIntentService::GetIntent() {
+std::unique_ptr<IIntent> PicoSpeechToIntentService::GetIntent() {
 
     LogInfo() << "Start speech-to-intent process.";
 
@@ -66,7 +66,7 @@ IIntent* PicoSpeechToIntentService::GetIntent() {
     return Finalize();
 }
 
-IIntent* PicoSpeechToIntentService::GetConfirmation() {
+std::unique_ptr<IIntent> PicoSpeechToIntentService::GetConfirmation() {
 
     LogInfo() << "Start speech-to-intent process. Getting confirmation";
 
@@ -82,7 +82,7 @@ IIntent* PicoSpeechToIntentService::GetConfirmation() {
         is_finalized = ProcessFrame();
     }
 
-    IIntent* intent = Finalize();
+    std::unique_ptr<IIntent> intent = Finalize();
 
     if (intent->GetModule() == "AVA" && (intent->GetAction() == "yes" || intent->GetAction() == "no")) {
         return intent;
@@ -102,7 +102,7 @@ bool PicoSpeechToIntentService::ProcessFrame() {
     return is_finalized;
 }
 
-IIntent* PicoSpeechToIntentService::Finalize() {
+std::unique_ptr<IIntent> PicoSpeechToIntentService::Finalize() {
 
     bool is_understood = false;
 
@@ -129,7 +129,8 @@ IIntent* PicoSpeechToIntentService::Finalize() {
     if (status != PV_STATUS_SUCCESS) {
         LogError() << "Failed to get intent. " << pv_status_to_string(status);
         pv_rhino_reset(rhino_);
-        return intent_ptr;
+        std::unique_ptr<IIntent> ptr{ intent_ptr };
+        return ptr;
     } 
     if (slots != nullptr && values != nullptr) {
         LogInfo() << "Got intent. Intent: " << intent << " Slots: " << *slots << " Values: " << *values;
@@ -141,7 +142,8 @@ IIntent* PicoSpeechToIntentService::Finalize() {
 
     pv_rhino_free_slots_and_values(rhino_, slots, values);
     pv_rhino_reset(rhino_);
-    return intent_ptr;
+    std::unique_ptr<IIntent> ptr{ intent_ptr };
+    return ptr;
 }
 
 PicoSpeechToIntentService::~PicoSpeechToIntentService() {

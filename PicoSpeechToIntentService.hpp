@@ -8,15 +8,15 @@ class IMicrophoneService;
 class PicoSpeechToIntentService : public ISpeechToIntentService, private LoggerFactory {
 public:
 	PicoSpeechToIntentService(std::shared_ptr<IMicrophoneService>);
-	IIntent* GetIntent();
-	IIntent* GetConfirmation();
+	std::unique_ptr<IIntent> GetIntent();
+	std::unique_ptr<IIntent> GetConfirmation();
 	~PicoSpeechToIntentService();
 private:
 	void StartRhino();
 	void StopRhino();
 
 	bool ProcessFrame();
-	IIntent* Finalize();
+	std::unique_ptr<IIntent> Finalize();
 
 	int16_t* pcm_ = nullptr;
 	std::shared_ptr<IMicrophoneService> microhpone_;

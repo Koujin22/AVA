@@ -54,20 +54,17 @@ void ModuleService::UnloadModules() {
     {
         WaitForInputIdle(it->hProcess, INFINITE);
 
+        EnumWindows(&win::SendWMCloseMsg, it->dwProcessId);
         if (WaitForSingleObject(it->hProcess, 1000) == WAIT_TIMEOUT)
         {
-            EnumWindows(&win::SendWMCloseMsg, it->dwProcessId);
-            if (WaitForSingleObject(it->hProcess, 1000) == WAIT_TIMEOUT)
-            {
-                // application did not close in a timely manner, do something...
+                
+            // application did not close in a timely manner, do something...
 
-                // in this example, just kill it.  In a real world
-                // app, you should ask the user what to do...
-                LogWarn() << "Terminated process";
-                TerminateProcess(it->hProcess, 0);
-            }
+            // in this example, just kill it.  In a real world
+            // app, you should ask the user what to do...
+            LogWarn() << "Terminated process";
+            TerminateProcess(it->hProcess, 0);
         }
-
         CloseHandle(it->hProcess);
     }
 

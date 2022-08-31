@@ -207,7 +207,6 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     <ClCompile Include="PicoRecorderService.cpp" />
     <ClCompile Include="PicoSpeechToIntentService.cpp" />
     <ClCompile Include="PicoWakeUpService.cpp" />
-    <ClCompile Include="RequestService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ava.hpp" />
@@ -236,7 +235,6 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     <ClInclude Include="PicoRecorderService.hpp" />
     <ClInclude Include="PicoSpeechToIntentService.hpp" />
     <ClInclude Include="PicoWakeUpService.hpp" />
-    <ClInclude Include="RequestService.hpp" />
     <ClInclude Include="WindowsUtil.hpp" />
   </ItemGroup>
   <ItemGroup>

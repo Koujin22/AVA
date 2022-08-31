@@ -26,6 +26,12 @@ void AvaModuleInteraction::Run() {
 		try {
 			ModuleRequest req = ava_req_->WaitForRequest();
 			LogInfo() << "Got request on module interaction! " << req.ToString();
+			try {
+				ava_->Run(req);
+			}
+			catch (ModulePaused p) {
+				ava_req_->Add(req);
+			}
 		}
 		catch (TimeoutError c) {}		
 	}	
@@ -36,4 +42,8 @@ void AvaModuleInteraction::Stop() {
 		LogWarn() << "Tried to stop when it wasnt running.";
 	}
 	status_ = false;
+}
+
+const char* ModulePaused::what() {
+	return "Module coms was paused";
 }

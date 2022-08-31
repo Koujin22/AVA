@@ -17,7 +17,12 @@ class Test_Module(Module):
     def start(self):
         self.log.info("Iniciado!")
         time.sleep(5)
-        self.ava.requestCommunication(1)
+        self.ava.startCommunication(1)
+        count = 5
+        while(count > 0):
+            self.ava.say("T")
+            time.sleep(1)
+            count-=1
 
 if __name__ == "__main__":
     note: Test_Module = Test_Module()

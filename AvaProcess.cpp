@@ -2,33 +2,41 @@
 #include "FrameworkManager.hpp"
 #include "ModuleService.hpp"
 #include "CommunicationManager.hpp"
-#include "ModuleService.hpp"
 #include "ModuleCommand.hpp"
 #include "PicoIntent.hpp"
 #include <zmq.hpp>
-
+#include "AvaModuleInteraction.hpp"
 
 AvaProcess::AvaProcess(std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<zmq::context_t> context) :
 	LoggerFactory{ this },
 	framework_ { new FrameworkManager(microphone)},
 	modules_{ new ModuleService() },
-	comms_{ new CommunicationManager(context) }
+	comms_{ new CommunicationManager(context) },
+	should_pause_ {false}
  {
 	LoadModules();
 }
 
 bool AvaProcess::Run() {
+	{
+		std::unique_lock lock(control_mutex_);
+		should_pause_ = true;
+	}
 	std::unique_lock lock(mutex_);
+	{
+		std::unique_lock lock(control_mutex_);
+		should_pause_ = false;
+	}
 	framework_->SayText("What can I do for you sir?", true);
 	std::unique_ptr<IIntent> intent{ framework_->GetIntent() };
 	return RunSynchronized(move(intent));
 }
 
-bool AvaProcess::Run(std::unique_ptr<IIntent> intent) {
+bool AvaProcess::Run(ModuleRequest& module_req) {
 	std::unique_lock lock(mutex_);
+	std::unique_ptr<IIntent> intent = std::make_unique<PicoIntent>(module_req);
 	return RunSynchronized(move(intent));
 }
-
 
 bool AvaProcess::RunSynchronized(std::unique_ptr<IIntent> intent) {
 	bool turn_off = false;
@@ -68,6 +76,16 @@ void AvaProcess::CommunicateModule(std::unique_ptr<IIntent> intent) {
 		LogDebug() << "Waiting on modules response";
 		zmq::message_t msg;
 		comms_->RecvMsg(msg);
+		
+		{
+			std::unique_lock lock(control_mutex_);
+			if (should_pause_) {
+				zmq::message_t done{ std::string{"pause"} };
+				if(!msg.empty()) comms_->SendMsg(done);
+				should_pause_ = false;
+				throw ModulePaused();
+			}
+		}
 
 		if (msg.empty()) {
 			LogWarn() << "Got not response from module.";
@@ -78,8 +96,8 @@ void AvaProcess::CommunicateModule(std::unique_ptr<IIntent> intent) {
 		}
 
 	}
-	intent.reset();
 }
+
 
 bool AvaProcess::ProcessModuleMsg(zmq::message_t& msg) {
 	std::string_view msg_view = msg.to_string_view();
@@ -92,7 +110,12 @@ bool AvaProcess::ProcessModuleMsg(zmq::message_t& msg) {
 	}
 	else {
 		ModuleCommand mod_command(msg_view);
-
+		if (mod_command.GetParam().size() > 50) {
+			LogWarn() << "Got a param thats way too long.";
+			zmq::message_t empty_msg{ std::string{"badRequest"} };
+			comms_->SendMsg(empty_msg);
+			return false;
+		}
 		LogDebug() << mod_command.ToString();
 		if (mod_command.GetCommand() == "say") {
 
@@ -109,7 +132,7 @@ bool AvaProcess::ProcessModuleMsg(zmq::message_t& msg) {
 		}
 		else if (mod_command.GetCommand() == "confirm") {
 			framework_->SayText(mod_command.GetParam(), mod_command.IsAsync(), mod_command.GetLang());
-			IIntent* intent = framework_->GetConfirmation();
+			std::unique_ptr<IIntent>  intent = framework_->GetConfirmation();
 			if (intent == nullptr) {
 				zmq::message_t confirmation(std::string{ "" });
 				comms_->SendMsg(confirmation);
@@ -118,6 +141,7 @@ bool AvaProcess::ProcessModuleMsg(zmq::message_t& msg) {
 				zmq::message_t confirmation(intent->GetAction());
 				comms_->SendMsg(confirmation);
 			}
+
 		}
 		return false;
 	}

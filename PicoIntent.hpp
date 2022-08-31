@@ -3,6 +3,7 @@
 
 class PicoIntent : public IIntent {
 public:
+	PicoIntent(ModuleRequest& req);
 	PicoIntent(const char* intent, int32_t num_slots, const char** slots, const char** values);
 	std::string GetModule();
 	std::string GetAction();

@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
+#include "Logging.hpp"
 
-class ModuleCommand {
+class ModuleCommand : LoggerFactory {
 public:
 	ModuleCommand(std::string_view);
 	const std::string& GetCommand();

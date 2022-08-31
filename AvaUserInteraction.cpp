@@ -1,6 +1,7 @@
 #include "AvaUserInteraction.hpp"
 #include "PicoWakeUpService.hpp"
 #include "AvaProcess.hpp"
+#include "AvaRequestService.hpp"
 
 
 namespace ConstStr {
@@ -15,9 +16,10 @@ namespace ConstStr {
         </speak>)";
 }
 
-AvaUserInteraction::AvaUserInteraction(std::shared_ptr<AvaProcess> ava, std::shared_ptr<IMicrophoneService> microphone) :
+AvaUserInteraction::AvaUserInteraction(std::shared_ptr<AvaProcess> ava, std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<AvaRequestService> ava_req) :
     LoggerFactory(this),
     wake_up_service_{ new PicoWakeUpService(microphone) },
+    ava_req_{ ava_req },
     ava_{ ava } { }
 
 void AvaUserInteraction::Start() {
@@ -31,7 +33,7 @@ void AvaUserInteraction::Run() {
 
         ListenForWakeUpWord();
         turn_off = ava_->Run();
-
+        ava_req_->Notify();
     }
     ava_->SaySsml(ConstStr::bye);
 }

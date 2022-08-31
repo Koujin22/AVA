@@ -69,9 +69,6 @@
     <ClCompile Include="GoogleSpeechToTextService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
-    <ClCompile Include="AvaProcess.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleService.cpp">
       <Filter>Archivos de origen\Modules</Filter>
     </ClCompile>
@@ -81,23 +78,23 @@
     <ClCompile Include="CommunicationManager.cpp">
       <Filter>Archivos de origen\Communication</Filter>
     </ClCompile>
-    <ClCompile Include="RequestService.cpp">
-      <Filter>Archivos de origen\Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleRequest.cpp">
       <Filter>Archivos de origen\Modules</Filter>
     </ClCompile>
     <ClCompile Include="AvaUserInteraction.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="AvaModuleInteraction.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="AvaProcess.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
     <ClCompile Include="AvaModuleRequest.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="AvaRequestService.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="AvaModuleInteraction.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>Archivos de origen\Communication</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,9 +152,6 @@
     <ClInclude Include="Ava.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="AvaProcess.hpp">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleService.hpp">
       <Filter>Archivos de encabezado\Modules</Filter>
     </ClInclude>
@@ -167,23 +161,23 @@
     <ClInclude Include="CommunicationManager.hpp">
       <Filter>Archivos de encabezado\Communication</Filter>
     </ClInclude>
-    <ClInclude Include="RequestService.hpp">
-      <Filter>Archivos de encabezado\Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleRequest.hpp">
       <Filter>Archivos de encabezado\Modules</Filter>
     </ClInclude>
     <ClInclude Include="AvaUserInteraction.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="AvaModuleInteraction.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaProcess.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
+    </ClInclude>
     <ClInclude Include="AvaModuleRequest.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="AvaRequestService.hpp">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="AvaModuleInteraction.hpp">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\Communication</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

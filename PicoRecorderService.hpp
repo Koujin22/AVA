@@ -2,8 +2,6 @@
 #include "IMicrophoneService.hpp"
 #include "Logging.hpp"
 
-class IMicrophoneService;
-
 typedef struct pv_recorder pv_recorder_t;
 
 class PicoRecorderService : public IMicrophoneService, private LoggerFactory {

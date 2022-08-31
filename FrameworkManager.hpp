@@ -3,18 +3,12 @@
 #include <string>
 #include "Logging.hpp"
 
-class IWakeUpService;
 class ITextToSpeechService;
 class IMicrophoneService;
 class ISpeechToIntentService;
 class ISpeechToTextService;
 class IIntent;
 
-namespace zmq {
-	class context_t;
-	class socket_t;
-	class message_t;
-}
 
 /*
 * FremworkService se encarga de manejar y coordinar los servicios basicos para que AVA funcione.
@@ -26,9 +20,9 @@ public:
 
 	void SayText(std::string, bool async = false, std::string = "en-us");
 	void SaySsml(std::string, bool async = false, std::string = "en-us");
-	IIntent* GetConfirmation();
+	std::unique_ptr<IIntent> GetConfirmation();
 	std::string GetText(int);
-	IIntent* GetIntent();
+	std::unique_ptr<IIntent> GetIntent();
 
 	~FrameworkManager();
 private:

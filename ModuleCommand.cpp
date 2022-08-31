@@ -6,6 +6,7 @@ ModuleCommand::ModuleCommand(std::string_view msg) :
 	ModuleCommand(msg, msg.find("_")) {}
 
 ModuleCommand::ModuleCommand(std::string_view msg_view, int end_command) :
+	LoggerFactory(this),
 	command_{ msg_view.data(), end_command },
 	param_{msg_view.data() +end_command+1, msg_view.find("#") - end_command - 1 },
 	vars_{msg_view.data()+ msg_view.find("#") + 1, msg_view.size() - msg_view.find("#") - 1} {
@@ -29,11 +30,15 @@ string ModuleCommand::GetLang() {
 
 int ModuleCommand::GetTime() {
 	if (vars_.find('T') == -1) {
-		return 10;
+		return 5;
 	}
-	return std::stoi(vars_.substr(vars_.find('T') + 1, vars_.find('T') + 2));
+	int duration = std::stoi(vars_.substr(vars_.find('T') + 1, vars_.find('T') + 2));
+	if (duration > 5) {
+		LogWarn() << "Detected more than 10 seconds. Need a safeway for modules to request longer things.";
+	}
+	return (duration > 5) ? 5 : duration;
 }
 
 string ModuleCommand::ToString() {
-	return "Command: " + command_ + " Vars: " + vars_ + "\nParam: " + param_;
+	return "Command: " + command_ + " Vars: " + vars_ + "Param: " + param_;
 }

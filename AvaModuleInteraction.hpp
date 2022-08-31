@@ -4,6 +4,11 @@
 class AvaProcess;
 class AvaRequestService;
 
+class ModulePaused : public std::exception {
+public:
+	const char* what();
+};
+
 class AvaModuleInteraction : private LoggerFactory {
 public:
 	AvaModuleInteraction(std::shared_ptr<AvaProcess>, std::shared_ptr<AvaRequestService>);

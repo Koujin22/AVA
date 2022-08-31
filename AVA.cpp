@@ -20,7 +20,7 @@ AVA::AVA(std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<zmq::co
 
 AVA::AVA(std::shared_ptr<AvaProcess> ava, std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<zmq::context_t> context, std::shared_ptr<AvaRequestService> req) :
     LoggerFactory(this),
-    ava_user_interaction_{new AvaUserInteraction(ava, microphone)},
+    ava_user_interaction_{new AvaUserInteraction(ava, microphone, req)},
     ava_module_request_{new AvaModuleRequest (context, req) },
     ava_module_interaction_{new AvaModuleInteraction(ava, req)}
 {}
@@ -39,8 +39,9 @@ void AVA::Start() {
 
 
 AVA::~AVA() {
-    delete ava_user_interaction_;
+    delete ava_module_interaction_;
     delete ava_module_request_;
+    delete ava_user_interaction_;
 }
 
 bool EnableVTMode()

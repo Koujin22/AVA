@@ -3,12 +3,20 @@
 
 AvaRequestService::AvaRequestService() : LoggerFactory(this), request_queue_{} {}
 
+void AvaRequestService::Notify() {
+	condition_variable_.notify_one();
+}
+
 void AvaRequestService::Notify(ModuleRequest& module_req) {
+	Add(module_req);
+	condition_variable_.notify_one();
+}
+
+void AvaRequestService::Add(ModuleRequest& module_req) {
 	std::unique_lock lock(mutex_);
 
 	request_queue_.push(module_req);
-	lock.unlock();
-	condition_variable_.notify_one();
+
 }
 
 ModuleRequest AvaRequestService::WaitForRequest() {
@@ -24,3 +32,4 @@ ModuleRequest AvaRequestService::WaitForRequest() {
 	}
 
 }
+

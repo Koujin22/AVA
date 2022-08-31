@@ -5,6 +5,6 @@ class IIntent;
 class ISpeechToIntentService {
 public:
 	virtual ~ISpeechToIntentService() {};
-	virtual IIntent* GetIntent() = 0;
-	virtual IIntent* GetConfirmation() = 0;
+	virtual std::unique_ptr<IIntent> GetIntent() = 0;
+	virtual std::unique_ptr<IIntent> GetConfirmation() = 0;
 };

@@ -40,12 +40,12 @@ void FrameworkManager::SaySsml(string msg, bool async, string language) {
 	else text_to_speech_service_->SaySsml(msg, language);
 }
 
-IIntent* FrameworkManager::GetConfirmation() {
+std::unique_ptr<IIntent> FrameworkManager::GetConfirmation() {
 	return speech_to_intent_service_->GetConfirmation();
 }
 
-IIntent* FrameworkManager::GetIntent() {
-	IIntent* intent = nullptr;
+std::unique_ptr<IIntent> FrameworkManager::GetIntent() {
+	std::unique_ptr<IIntent>  intent{ nullptr };
 	while (!intent) {
 		intent = speech_to_intent_service_->GetIntent();
 		if (!intent) {

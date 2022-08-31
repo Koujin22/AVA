@@ -2,6 +2,8 @@
 #include <string>
 #include <map>
 
+class ModuleRequest;
+
 class IIntent {
 public:
 	virtual ~IIntent() {};
