@@ -23,6 +23,7 @@ class Test_Module(Module):
             self.ava.say("T")
             time.sleep(1)
             count-=1
+        self.ava.finish()
 
 if __name__ == "__main__":
     note: Test_Module = Test_Module()

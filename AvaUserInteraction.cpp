@@ -2,7 +2,7 @@
 #include "PicoWakeUpService.hpp"
 #include "AvaProcess.hpp"
 #include "AvaRequestService.hpp"
-
+#include "AvaCommandResult.hpp"
 
 namespace ConstStr {
     const std::string welcome =
@@ -32,7 +32,10 @@ void AvaUserInteraction::Run() {
     while (!turn_off) {
 
         ListenForWakeUpWord();
-        turn_off = ava_->Run();
+        std::unique_ptr<AvaCommandResult> result = ava_->Run();
+        if (result) {
+            turn_off = result->IsOff();
+        }
         ava_req_->Notify();
     }
     ava_->SaySsml(ConstStr::bye);

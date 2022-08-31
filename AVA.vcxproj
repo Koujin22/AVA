@@ -190,6 +190,7 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp" />
+    <ClCompile Include="AvaCommandResult.cpp" />
     <ClCompile Include="AvaModuleInteraction.cpp" />
     <ClCompile Include="AvaModuleRequest.cpp" />
     <ClCompile Include="AvaProcess.cpp" />
@@ -210,6 +211,7 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ava.hpp" />
+    <ClInclude Include="AvaCommandResult.hpp" />
     <ClInclude Include="AvaModuleInteraction.hpp" />
     <ClInclude Include="AvaModuleRequest.hpp" />
     <ClInclude Include="AvaProcess.hpp" />

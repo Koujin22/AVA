@@ -96,6 +96,9 @@
     <ClCompile Include="AvaRequestService.cpp">
       <Filter>Archivos de origen\Communication</Filter>
     </ClCompile>
+    <ClCompile Include="AvaCommandResult.cpp">
+      <Filter>Archivos de origen\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FrameworkManager.hpp">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="AvaRequestService.hpp">
       <Filter>Archivos de encabezado\Communication</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaCommandResult.hpp">
+      <Filter>Archivos de encabezado\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -71,10 +71,19 @@ class AvaModule(Module):
             if(msg == b'done'):
                 self.timeout.cancel()
                 self.socket_state = SocketState.WAITING_INTENT
-            elif(msg==b'pause'):
+            elif(b'pauseCmd:' in msg):
                 self.timeout.cancel()
                 self.socket_state = SocketState.WAITING_INTENT
                 self.__waitForCTA()
+                cmd = msg.decode().split("pauseCmd:")[1]
+                if('say_listen_' in cmd):
+                    send_time = len(cmd.split("#")[0])/5+10
+                elif('say_' in cmd):
+                    send_time = max(len(cmd.split("#")[0])/5, 5) if not cmd[cmd.find("A")] == 't' else 5
+                elif('confirm_' in cmd):
+                    send_time = len(cmd.split("#")[0])/9+5
+                self.__send_req(cmd.encode(), send_time)
+                self.__listen_req(time)
             else:
                 self.socket_state = SocketState.READY_TO_SEND
                 self.__reset_timeout(time)

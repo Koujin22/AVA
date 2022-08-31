@@ -24,6 +24,7 @@ void AvaModuleInteraction::Start() {
 void AvaModuleInteraction::Run() {
 	while(status_){
 		try {
+
 			ModuleRequest req = ava_req_->WaitForRequest();
 			LogInfo() << "Got request on module interaction! " << req.ToString();
 			try {

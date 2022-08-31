@@ -5,6 +5,7 @@
 #include "ModuleCommand.hpp"
 #include "PicoIntent.hpp"
 #include <zmq.hpp>
+#include "AvaCommandResult.hpp"
 #include "AvaModuleInteraction.hpp"
 
 AvaProcess::AvaProcess(std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<zmq::context_t> context) :
@@ -17,7 +18,7 @@ AvaProcess::AvaProcess(std::shared_ptr<IMicrophoneService> microphone, std::shar
 	LoadModules();
 }
 
-bool AvaProcess::Run() {
+std::unique_ptr<AvaCommandResult> AvaProcess::Run() {
 	{
 		std::unique_lock lock(control_mutex_);
 		should_pause_ = true;
@@ -32,38 +33,41 @@ bool AvaProcess::Run() {
 	return RunSynchronized(move(intent));
 }
 
-bool AvaProcess::Run(ModuleRequest& module_req) {
+std::unique_ptr<AvaCommandResult> AvaProcess::Run(ModuleRequest& module_req) {
 	std::unique_lock lock(mutex_);
 	std::unique_ptr<IIntent> intent = std::make_unique<PicoIntent>(module_req);
 	return RunSynchronized(move(intent));
 }
 
-bool AvaProcess::RunSynchronized(std::unique_ptr<IIntent> intent) {
-	bool turn_off = false;
+std::unique_ptr<AvaCommandResult> AvaProcess::RunSynchronized(std::unique_ptr<IIntent> intent) {
 
 	if (intent->GetModule() == "AVA") {
-		turn_off = ProcessAvaCommand(move(intent));
+		return ProcessAvaCommand(move(intent));
 	}
 	else {
 		CommunicateModule(move(intent));
+		std::unique_ptr<AvaCommandResult> r{ nullptr };
+		return r;
 	}
-	return turn_off;
 
 }
 
-bool AvaProcess::ProcessAvaCommand(std::unique_ptr<IIntent> intent) {
+std::unique_ptr<AvaCommandResult> AvaProcess::ProcessAvaCommand(std::unique_ptr<IIntent> intent) {
 	LogDebug() << "Got ava command. action: " << intent->GetAction();
-	bool turn_off = false;
+	std::unique_ptr<AvaCommandResult> result = std::make_unique<AvaCommandResult>();
 	if (intent->GetAction() == "turnoff") {
-		turn_off = true;
+		result->SetOff(true);
 	}
 	else if (intent->GetAction() == "reload_modules") {
 		framework_->SayText("Reloading modules!");
 		ReloadModules();
 		framework_->SayText("Modules have been reloaded");
 	}
+	else if (intent->GetAction() == "cancel_mod_comm") {
+		result->SetCancelled(true);
+	}
 	intent.reset();
-	return turn_off;
+	return result;
 }
 
 void AvaProcess::CommunicateModule(std::unique_ptr<IIntent> intent) {
@@ -80,7 +84,7 @@ void AvaProcess::CommunicateModule(std::unique_ptr<IIntent> intent) {
 		{
 			std::unique_lock lock(control_mutex_);
 			if (should_pause_) {
-				zmq::message_t done{ std::string{"pause"} };
+				zmq::message_t done{ std::string{"pauseCmd:"}+msg.to_string() };
 				if(!msg.empty()) comms_->SendMsg(done);
 				should_pause_ = false;
 				throw ModulePaused();
@@ -97,7 +101,6 @@ void AvaProcess::CommunicateModule(std::unique_ptr<IIntent> intent) {
 
 	}
 }
-
 
 bool AvaProcess::ProcessModuleMsg(zmq::message_t& msg) {
 	std::string_view msg_view = msg.to_string_view();
@@ -145,6 +148,15 @@ bool AvaProcess::ProcessModuleMsg(zmq::message_t& msg) {
 		}
 		return false;
 	}
+}
+
+void AvaProcess::CancelComs(ModuleRequest& req) {
+
+	std::unique_ptr<IIntent> intent = std::make_unique<PicoIntent>(req, false);
+
+	zmq::message_t intent_msg(intent->ToString());
+	LogInfo() << "Cancelling? " << intent_msg.to_string();
+	comms_->PublishMsg(intent_msg);
 }
 
 void AvaProcess::SaySsml(std::string msg, bool async) {

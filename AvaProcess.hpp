@@ -1,6 +1,7 @@
 #pragma once
 #include "Logging.hpp"
 #include <mutex>
+#include "AvaCommandResult.hpp"
 
 class FrameworkManager;
 class CommunicationManager;
@@ -18,17 +19,19 @@ class AvaProcess : private LoggerFactory {
 public:
 	AvaProcess(std::shared_ptr<IMicrophoneService>, std::shared_ptr<zmq::context_t>);
 
-	bool Run();
-	bool Run(ModuleRequest&);
+	std::unique_ptr<AvaCommandResult> Run();
+	std::unique_ptr<AvaCommandResult> Run(ModuleRequest&);
+
+	void CancelComs(ModuleRequest&);
 
 	void SaySsml(std::string, bool async = false);
 
 	~AvaProcess();
 private:
 
-	bool RunSynchronized(std::unique_ptr<IIntent>);
+	std::unique_ptr<AvaCommandResult> RunSynchronized(std::unique_ptr<IIntent>);
 
-	bool ProcessAvaCommand(std::unique_ptr<IIntent>);
+	std::unique_ptr<AvaCommandResult> ProcessAvaCommand(std::unique_ptr<IIntent>);
 	void CommunicateModule(std::unique_ptr<IIntent>);
 	bool ProcessModuleMsg(zmq::message_t&);
 
