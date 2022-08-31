@@ -151,3 +151,12 @@ class AvaModule(Module):
             raise CouldntConfirm
         msg = response.decode()
         return msg == 'yes'
+
+        
+    def requestCommunication(self, priority: int) -> bool:
+        self.connection.send_req_com(bytes(self.module_name+":req#"+str(priority), "ascii"))
+        msg = self.connection.recv_req_com()
+        
+        self.socket_state = SocketState.READY_TO_SEND
+        self.__reset_timeout(5.0, False)
+        return msg==b'ok'

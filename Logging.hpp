@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <mutex>
 
 
 enum LOG_LEVELS {
@@ -82,6 +83,7 @@ protected:
 	Logger LogVerbose() { return Log("VERBOSE", level >= 5); }
 
 	Logger Log(std::string level, bool will_print, COLORS color = COLORS::DEFAULT) {
+		std::unique_lock lock(mutex_);
 		return Logger(class_name, level, will_print, GetColorSequence(color));
 	}
 
@@ -89,6 +91,7 @@ protected:
 
 private:
 
+	static std::mutex mutex_;
 	
 	static std::string GetColorSequence(COLORS fg_color) {
 		switch (fg_color) {
@@ -112,4 +115,3 @@ private:
 	};
 	std::string class_name;
 };
-

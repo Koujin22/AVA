@@ -190,18 +190,33 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp" />
+    <ClCompile Include="AvaModuleInteraction.cpp" />
+    <ClCompile Include="AvaModuleRequest.cpp" />
+    <ClCompile Include="AvaProcess.cpp" />
+    <ClCompile Include="AvaRequestService.cpp" />
+    <ClCompile Include="AvaUserInteraction.cpp" />
+    <ClCompile Include="CommunicationManager.cpp" />
     <ClCompile Include="ConfigurationManager.cpp" />
     <ClCompile Include="FrameworkManager.cpp" />
     <ClCompile Include="GoogleSpeechToTextService.cpp" />
     <ClCompile Include="GoogleTextToSpeechService.cpp" />
     <ClCompile Include="ModuleCommand.cpp" />
+    <ClCompile Include="ModuleRequest.cpp" />
     <ClCompile Include="ModuleService.cpp" />
     <ClCompile Include="PicoIntent.cpp" />
     <ClCompile Include="PicoRecorderService.cpp" />
     <ClCompile Include="PicoSpeechToIntentService.cpp" />
     <ClCompile Include="PicoWakeUpService.cpp" />
+    <ClCompile Include="RequestService.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ava.hpp" />
+    <ClInclude Include="AvaModuleInteraction.hpp" />
+    <ClInclude Include="AvaModuleRequest.hpp" />
+    <ClInclude Include="AvaProcess.hpp" />
+    <ClInclude Include="AvaRequestService.hpp" />
+    <ClInclude Include="AvaUserInteraction.hpp" />
+    <ClInclude Include="CommunicationManager.hpp" />
     <ClInclude Include="ConfigurationManager.hpp" />
     <ClInclude Include="FrameworkManager.hpp" />
     <ClInclude Include="GoogleSpeechToTextService.hpp" />
@@ -215,11 +230,13 @@ Xcopy "$(SolutionDir)resources\*.*" "$(TargetDir)resources" /Y /E /I</Command>
     <ClInclude Include="IWakeUpService.hpp" />
     <ClInclude Include="Logging.hpp" />
     <ClInclude Include="ModuleCommand.hpp" />
+    <ClInclude Include="ModuleRequest.hpp" />
     <ClInclude Include="ModuleService.hpp" />
     <ClInclude Include="PicoIntent.hpp" />
     <ClInclude Include="PicoRecorderService.hpp" />
     <ClInclude Include="PicoSpeechToIntentService.hpp" />
     <ClInclude Include="PicoWakeUpService.hpp" />
+    <ClInclude Include="RequestService.hpp" />
     <ClInclude Include="WindowsUtil.hpp" />
   </ItemGroup>
   <ItemGroup>

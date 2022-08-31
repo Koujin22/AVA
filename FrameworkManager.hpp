@@ -9,7 +9,6 @@ class IMicrophoneService;
 class ISpeechToIntentService;
 class ISpeechToTextService;
 class IIntent;
-class IModuleService;
 
 namespace zmq {
 	class context_t;
@@ -21,32 +20,21 @@ namespace zmq {
 * FremworkService se encarga de manejar y coordinar los servicios basicos para que AVA funcione.
 */
 class FrameworkManager : private LoggerFactory {
-public: 
-	FrameworkManager();
-	void StartAvA();
-	~FrameworkManager();
-private:
-	void LoadModules();
-	void ListenForWakeUpWord();
-	bool ProcessAvaCommand(std::unique_ptr<IIntent> intent);
-	void ProcessIntent(std::unique_ptr<IIntent> intent);
-	bool ProcessModuleMsg(zmq::message_t&);
+public:
+	FrameworkManager(std::shared_ptr<IMicrophoneService>);
+
+
 	void SayText(std::string, bool async = false, std::string = "en-us");
 	void SaySsml(std::string, bool async = false, std::string = "en-us");
 	IIntent* GetConfirmation();
 	std::string GetText(int);
 	IIntent* GetIntent();
-	
-	void BroadCastIntent(IIntent&);
 
-	FrameworkManager(std::shared_ptr<IMicrophoneService>);
+	~FrameworkManager();
+private:
+
 	ITextToSpeechService* const text_to_speech_service_;
-	IWakeUpService* const  wake_up_service_;
 	ISpeechToIntentService* const speech_to_intent_service_;
 	ISpeechToTextService* const speech_to_text_service_;
-	zmq::context_t* const zmq_context_;
-	zmq::socket_t* const zmq_pub_socket_;
-	zmq::socket_t* const zmq_rep_socket_;
-	IModuleService* const module_service_;
 	
 };

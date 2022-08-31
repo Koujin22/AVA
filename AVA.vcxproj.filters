@@ -28,6 +28,18 @@
     <Filter Include="Archivos de encabezado\Framework\Interface">
       <UniqueIdentifier>{0a00e0dd-053c-46ba-a361-371c71bbb4f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de encabezado\Modules">
+      <UniqueIdentifier>{fc19508a-3865-4c73-82d0-faf17d9dca7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Modules">
+      <UniqueIdentifier>{45a65beb-3715-4e86-88d1-5776ac252676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Communication">
+      <UniqueIdentifier>{22a787ce-9007-4922-aac7-75d8fb4ca7dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Communication">
+      <UniqueIdentifier>{6b3bd750-bd0e-41cf-98ed-ca5bfc3816c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AVA.cpp">
@@ -57,11 +69,35 @@
     <ClCompile Include="GoogleSpeechToTextService.cpp">
       <Filter>Archivos de origen\Framework</Filter>
     </ClCompile>
+    <ClCompile Include="AvaProcess.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
     <ClCompile Include="ModuleService.cpp">
-      <Filter>Archivos de origen\Framework</Filter>
+      <Filter>Archivos de origen\Modules</Filter>
     </ClCompile>
     <ClCompile Include="ModuleCommand.cpp">
-      <Filter>Archivos de origen\Framework</Filter>
+      <Filter>Archivos de origen\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="CommunicationManager.cpp">
+      <Filter>Archivos de origen\Communication</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestService.cpp">
+      <Filter>Archivos de origen\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleRequest.cpp">
+      <Filter>Archivos de origen\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="AvaUserInteraction.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="AvaModuleRequest.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="AvaRequestService.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="AvaModuleInteraction.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,14 +149,41 @@
     <ClInclude Include="IModuleService.hpp">
       <Filter>Archivos de encabezado\Framework\Interface</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleService.hpp">
-      <Filter>Archivos de encabezado\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="WindowsUtil.hpp">
       <Filter>Archivos de encabezado\Util</Filter>
     </ClInclude>
+    <ClInclude Include="Ava.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaProcess.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleService.hpp">
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
     <ClInclude Include="ModuleCommand.hpp">
-      <Filter>Archivos de encabezado\Framework</Filter>
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="CommunicationManager.hpp">
+      <Filter>Archivos de encabezado\Communication</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestService.hpp">
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleRequest.hpp">
+      <Filter>Archivos de encabezado\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaUserInteraction.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaModuleRequest.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaRequestService.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AvaModuleInteraction.hpp">
+      <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

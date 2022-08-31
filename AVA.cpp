@@ -1,9 +1,47 @@
 
 #include <Windows.h>
 #include "ConfigurationManager.hpp"
-#include "FrameworkManager.hpp"
+#include "PicoWakeUpService.hpp"
+#include "PicoRecorderService.hpp"
+#include "AvaProcess.hpp"
+#include "PicoIntent.hpp"
+#include "AvaUserInteraction.hpp"
+#include "Ava.hpp"
+#include <thread>
+#include <zmq.hpp>
+#include "AvaModuleRequest.hpp"
+#include "AvaRequestService.hpp"
+#include "AvaModuleInteraction.hpp"
 
-using namespace std;
+
+AVA::AVA() : AVA(std::make_shared<PicoRecorderService>(), std::make_shared<zmq::context_t>()) {}
+
+AVA::AVA(std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<zmq::context_t> context) : AVA(std::make_shared<AvaProcess>(microphone, context), microphone, context, std::make_shared<AvaRequestService>()) {}
+
+AVA::AVA(std::shared_ptr<AvaProcess> ava, std::shared_ptr<IMicrophoneService> microphone, std::shared_ptr<zmq::context_t> context, std::shared_ptr<AvaRequestService> req) :
+    LoggerFactory(this),
+    ava_user_interaction_{new AvaUserInteraction(ava, microphone)},
+    ava_module_request_{new AvaModuleRequest (context, req) },
+    ava_module_interaction_{new AvaModuleInteraction(ava, req)}
+{}
+
+void AVA::Start() {
+    std::thread ava_user_thread(&AvaUserInteraction::Start, ava_user_interaction_);
+    std::thread ava_module_request_thread(&AvaModuleRequest::Start, ava_module_request_);
+    std::thread ava_module_interaction_thread(&AvaModuleInteraction::Start, ava_module_interaction_);
+
+    ava_user_thread.join();
+    ava_module_request_->Stop();
+    ava_module_request_thread.join();
+    ava_module_interaction_->Stop();
+    ava_module_interaction_thread.join();
+}
+
+
+AVA::~AVA() {
+    delete ava_user_interaction_;
+    delete ava_module_request_;
+}
 
 bool EnableVTMode()
 {
@@ -29,6 +67,9 @@ bool EnableVTMode()
 }
 
 
+std::mutex LoggerFactory::mutex_;
+
+
 /*/
 
 Log Levels
@@ -46,25 +87,13 @@ int main()
     SetConsoleOutputCP(CP_UTF8);
     EnableVTMode();
 
-    cout << "###############################################################################" << endl;
-    cout << "||                                                                           ||" << endl;
-    cout << "||                                  A.V.A.                                   ||" << endl;
-    cout << "||                                                                           ||" << endl;
-    cout << "###############################################################################" << endl;
-    cout << "||  TODO List:                                                               ||" << endl;
-    cout << "||  -Corra ava sin ventana y al inciar compu                                 ||" << endl;
-    cout << "||  -logger thread-safe2                                                     ||" << endl;
-    cout << "###############################################################################" << endl;
-
-    LoggerFactory::SetLoggingLevel(INFO);
+   
     config.LoadConfigurations("dev");
+    LoggerFactory::SetLoggingLevel(DEBUG);
 
-    FrameworkManager* framework_manager = new FrameworkManager();
-    cout << "_______________________________________________________________________________" << endl;
-    cout << "|                               Framework ready!                              |" << endl;
-    cout << "-------------------------------------------------------------------------------" << endl;
-    framework_manager->StartAvA();
+    AVA a;
+
+    a.Start();
     
-    delete framework_manager;
     return 0;
 }
